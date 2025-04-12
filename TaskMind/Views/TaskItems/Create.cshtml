@@ -1,0 +1,68 @@
+﻿@using TaskMind.Domain.Constants
+@model TaskMind.Application.DTOs.TaskItem.CreateTaskItemDto
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>TaskItem</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control" asp-items="ViewBag.TaskState"></select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Difficulty" class="control-label"></label>
+                <input asp-for="Difficulty" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="Difficulty" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RequiredSkills" class="control-label"></label>
+                <input asp-for="RequiredSkills" class="form-control" />
+                <span asp-validation-for="RequiredSkills" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DeadlineDays" class="control-label"></label>
+                <input asp-for="DeadlineDays" class="form-control" />
+                <span asp-validation-for="DeadlineDays" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EstimatedHours" class="control-label"></label>
+                <input asp-for="EstimatedHours" class="form-control" />
+                <span asp-validation-for="EstimatedHours" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Team" class="control-label"></label>
+                <select asp-for="TeamId" class ="form-control" asp-items="ViewBag.Team"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

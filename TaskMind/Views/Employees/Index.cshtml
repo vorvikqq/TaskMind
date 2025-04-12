@@ -1,0 +1,62 @@
+﻿@model IEnumerable<TaskMind.Domain.Models.Employee>
+
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<h1>Employees</h1>
+
+<p>
+    <a asp-action="Create">Add new Employee</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Skills)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CurrentWorkload)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskCompletionSpeed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Team)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+               @string.Join(", ", item.Skills)
+            </td>
+            <td>
+                    @Html.DisplayFor(modelItem => item.CurrentWorkload)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskCompletionSpeed)
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Team.Name)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+<div>
+    <a asp-controller="Home" asp-action="Index" class="m-2">Back</a>
+</div>

@@ -1,0 +1,40 @@
+html,
+body {
+    height: 100%;
+}
+
+
+.wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.my-wrapper {
+    flex: 1 1 auto;
+}
+
+.my-footer {
+    white-space: nowrap;
+    line-height: 60px;
+}
+
+img {
+    object-fit: cover;
+}
+
+.bottom-button-content {
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.table-danger {
+    background-color: #6c757d;
+    color: white;
+}
+
+.table-success {
+    background-color: #c3e6cb;
+    color: #155724;
+}

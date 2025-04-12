@@ -1,0 +1,59 @@
+﻿@model List<TaskMind.Domain.Models.TaskItem>
+
+<h2>Завдання для команди @ViewBag.Team.Name</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Опис</th>
+            <th>Статус</th>
+            <th>Складність</th>
+            <th>Працівник</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model)
+        {
+            <tr>
+                <td>@task.Title</td>
+                <td>@task.Description</td>
+                <td>@task.Status</td>
+                <td>@task.Difficulty</td>
+                <td>
+                    @if (task.Employee != null)
+                    {
+                        <a asp-action="Details" asp-controller="Employees" asp-route-id="@task.Employee.Id">
+                            @task.Employee.Name
+                        </a>
+                    }
+                    else
+                    {
+                        <span>Не призначено</span>
+                    }
+                </td>
+                <td>
+                    @if (task.Employee != null)
+                    {
+                        <form asp-controller="TaskAssign" asp-action="UnassignEmployee" asp-route-id="@task.Id" method="post">
+                            <button type="submit" class="btn btn-danger">Зняти робітника</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="AssignEmployee" asp-controller="TaskAssign" asp-route-id="@task.Id" method="post">
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                Призначити працівника
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
