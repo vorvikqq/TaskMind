@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskMind.Application.Mappers;
 using TaskMind.Application.Repositories.Interfaces;
-using TaskMind.Application.Services.Interfaces;
 using TaskMind.Domain.Models;
+using TaskMind.Infrastructure.Services.Interfaces;
 
 namespace TaskMind.Controllers
 {

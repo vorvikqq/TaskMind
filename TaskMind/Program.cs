@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Refit;
+using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Infrastructure.Data;
 using TaskMind.Infrastructure.Repositories;
-using TaskMind.Application.Repositories.Interfaces;
-using TaskMind.Application.Services.Interfaces;
-using Refit;
+using TaskMind.Infrastructure.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

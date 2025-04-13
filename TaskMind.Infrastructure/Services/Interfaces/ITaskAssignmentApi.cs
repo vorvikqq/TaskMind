@@ -1,7 +1,7 @@
 ﻿using Refit;
 using TaskMind.Application.DTOs.TaskAssignments;
 
-namespace TaskMind.Application.Services.Interfaces
+namespace TaskMind.Infrastructure.Services.Interfaces
 {
     public interface ITaskAssignmentApi
     {
