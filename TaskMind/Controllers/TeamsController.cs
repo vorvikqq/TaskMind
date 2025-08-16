@@ -1,132 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TaskMind.Application.Services.Interfaces;
 using TaskMind.Domain.Models;
-using TaskMind.Application.Repositories.Interfaces;
 
 namespace TaskMind.Controllers
 {
     public class TeamsController : Controller
     {
-        private readonly ITeamRepository _teamRepo;
-        private readonly ITaskItemRepository _taskItemRepo;
+        private readonly ITeamService _teamService;
 
-        public TeamsController(ITeamRepository teamRepo, ITaskItemRepository taskItemRepo)
+        public TeamsController(ITeamService teamService)
         {
-            _teamRepo = teamRepo;
-            _taskItemRepo = taskItemRepo;
+            _teamService = teamService;
         }
 
-        // GET: Teams
         public async Task<IActionResult> Index()
-        {
-            return View(await _teamRepo.GetAllAsync());
-        }
+            => View(await _teamService.GetAllAsync());
 
-        // GET: Teams/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var team = await _teamRepo.GetByIdAsync(id);
-            if (team == null)
-            {
-                return NotFound();
-            }
+            var team = await _teamService.GetByIdAsync(id.Value);
+            if (team == null) return NotFound();
 
             return View(team);
         }
 
-        // GET: Teams/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
-        // POST: Teams/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] Team team)
         {
-            if (ModelState.IsValid)
-            {
-                await _teamRepo.CreateAsync(team);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(team);
+            if (!ModelState.IsValid) return View(team);
+
+            await _teamService.CreateAsync(team);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Teams/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var team = await _teamRepo.GetByIdAsync(id);
-            if (team == null)
-            {
-                return NotFound();
-            }
+            var team = await _teamService.GetByIdAsync(id.Value);
+            if (team == null) return NotFound();
+
             return View(team);
         }
 
-        // POST: Teams/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Team team)
         {
-            if (id != team.Id)
+            if (id != team.Id) return NotFound();
+            if (!ModelState.IsValid) return View(team);
+
+            try
             {
-                return NotFound();
+                await _teamService.UpdateAsync(team);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_teamService.TeamExists(team.Id)) return NotFound();
+                else throw;
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    await _teamRepo.UpdateAsync(team);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TeamExists(team.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(team);
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var team = await _teamRepo.GetByIdAsync(id);
-            if (team == null)
-            {
-                return NotFound();
-            }
+            var team = await _teamService.GetByIdAsync(id.Value);
+            if (team == null) return NotFound();
 
             return View(team);
         }
@@ -135,7 +83,7 @@ namespace TaskMind.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _teamRepo.DeleteAsync(id);
+            await _teamService.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -143,18 +91,13 @@ namespace TaskMind.Controllers
         {
             if (id == null) return NotFound();
 
-            var team = await _teamRepo.GetByIdAsync(id);
+            var team = await _teamService.GetByIdAsync(id.Value);
             if (team == null) return NotFound();
 
-            var tasks = await _taskItemRepo.GetByTeamIdAsync(id);
+            var tasks = await _teamService.GetTasksForTeamAsync(team.Id);
 
             ViewData["Team"] = team;
             return View(tasks);
-        }
-       
-        private bool TeamExists(int id)
-        {
-            return _teamRepo.IsExist(id);
         }
     }
 }
