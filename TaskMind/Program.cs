@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Refit;
 using TaskMind.Application.Repositories.Interfaces;
+using TaskMind.Application.Services;
+using TaskMind.Application.Services.Interfaces;
 using TaskMind.Infrastructure.Data;
 using TaskMind.Infrastructure.Repositories;
-using TaskMind.Infrastructure.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +26,14 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddTransient<ITeamRepository, TeamRepository>();
-builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddTransient<ITaskItemRepository, TaskItemRepository>();
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<ITaskItemService, TaskItemService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
 
 // Додаємо Refit для взаємодії з API
 builder.Services.AddRefitClient<ITaskAssignmentApi>()
