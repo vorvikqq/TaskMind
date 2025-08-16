@@ -2,96 +2,60 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TaskMind.Application.DTOs.TaskItem;
-using TaskMind.Application.Mappers;
-using TaskMind.Application.Repositories.Interfaces;
-using TaskMind.Domain.Constants;
+using TaskMind.Application.Services.Interfaces;
 
 namespace TaskMind.Controllers
 {
     public class TaskItemsController : Controller
     {
-        private readonly ITaskItemRepository _taskItemRepo;
-        private readonly ITeamRepository _teamRepo;
-        private readonly List<SelectListItem> _taskStates;
+        private readonly ITaskItemService _taskItemService;
 
-        public TaskItemsController(ITaskItemRepository taskItemRepository, ITeamRepository teamRepo)
+        public TaskItemsController(ITaskItemService taskItemService)
         {
-            _taskItemRepo = taskItemRepository;
-            _teamRepo = teamRepo;
-
-            _taskStates = Enum.GetValues(typeof(TaskState))
-                              .Cast<TaskState>()
-                              .Select(ts => new SelectListItem
-                              {
-                                  Value = ((int)ts).ToString(),
-                                  Text = ts.ToString()
-                              })
-                              .ToList();
+            _taskItemService = taskItemService;
         }
 
-        // GET: TaskItems
         public async Task<IActionResult> Index()
-        {
-            return View(await _taskItemRepo.GetAllAsync());
-        }
+            => View(await _taskItemService.GetAllAsync());
 
-        // GET: TaskItems/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var taskItem = await _taskItemRepo.GetByIdAsync(id);
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
+            var taskItem = await _taskItemService.GetByIdAsync(id.Value);
+            if (taskItem == null) return NotFound();
 
             return View(taskItem);
         }
 
-        // GET: TaskItems/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["TaskState"] = _taskStates;
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name");
+            ViewData["TaskState"] = _taskItemService.GetTaskStates();
+            ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name");
             return View();
         }
 
-        // POST: TaskItems/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateTaskItemDto createTaskItemDto)
+        public async Task<IActionResult> Create(CreateTaskItemDto dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var taskItem = createTaskItemDto.ToTaskItemFromCreate();
-                await _taskItemRepo.CreateAsync(taskItem);
-                return RedirectToAction(nameof(Index));
+                ViewData["TaskState"] = _taskItemService.GetTaskStates();
+                ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name", dto.TeamId);
+                return View(dto);
             }
 
-            ViewData["TaskState"] = _taskStates;
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", createTaskItemDto.TeamId);
-            return View(createTaskItemDto);
+            await _taskItemService.CreateAsync(dto);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: TaskItems/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var taskItem = await _taskItemRepo.GetByIdAsync(id);
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
+            var taskItem = await _taskItemService.GetByIdAsync(id.Value);
+            if (taskItem == null) return NotFound();
 
             var updateDto = new UpdateTaskItemDto
             {
@@ -105,85 +69,57 @@ namespace TaskMind.Controllers
                 TeamId = taskItem.TeamId,
             };
 
-            ViewData["TaskState"] = _taskStates;
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", taskItem.TeamId);
+            ViewData["TaskState"] = _taskItemService.GetTaskStates();
+            ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name", taskItem.TeamId);
             return View(updateDto);
         }
 
-        // POST: TaskItems/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateTaskItemDto updateDto)
+        public async Task<IActionResult> Edit(int id, UpdateTaskItemDto dto)
         {
-            if (id != updateDto.Id)
+            if (id != dto.Id) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["TaskState"] = _taskItemService.GetTaskStates();
+                ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name", dto.TeamId);
+                return View(dto);
+            }
+
+            try
+            {
+                await _taskItemService.UpdateAsync(id, dto);
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
-
-            if (ModelState.IsValid)
+            catch (DbUpdateConcurrencyException)
             {
-                var taskItem = await _taskItemRepo.GetByIdAsync(id);
-                if (taskItem == null)
-                {
-                    return NotFound();
-                }
-
-                taskItem.UpdateTaskItemFromDto(updateDto);
-
-                try
-                {
-                    await _taskItemRepo.UpdateAsync(taskItem);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TaskItemExists(taskItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                if (!_taskItemService.TaskItemExists(dto.Id)) return NotFound();
+                else throw;
             }
 
-            ViewData["TaskState"] = _taskStates;
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", updateDto.TeamId);
-            return View(updateDto);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: TaskItems/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var taskItem = await _taskItemRepo.GetByIdAsync(id);
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
+            var taskItem = await _taskItemService.GetByIdAsync(id.Value);
+            if (taskItem == null) return NotFound();
 
             return View(taskItem);
         }
 
-        // POST: TaskItems/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _taskItemRepo.DeleteAsync(id);
+            await _taskItemService.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool TaskItemExists(int id)
-        {
-            return _taskItemRepo.IsExist(id);
         }
     }
 }
