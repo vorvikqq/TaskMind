@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TaskMind.Application.DTOs.Team;
 using TaskMind.Application.Services.Interfaces;
-using TaskMind.Domain.Models;
 
 namespace TaskMind.Controllers
 {
@@ -31,11 +31,11 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Team team)
+        public async Task<IActionResult> Create(CreateTeamDto dto)
         {
-            if (!ModelState.IsValid) return View(team);
+            if (!ModelState.IsValid) return View(dto);
 
-            await _teamService.CreateAsync(team);
+            await _teamService.CreateAsync(dto);
             return RedirectToAction(nameof(Index));
         }
 
@@ -43,27 +43,31 @@ namespace TaskMind.Controllers
         {
             if (id == null) return NotFound();
 
-            var team = await _teamService.GetByIdAsync(id.Value);
-            if (team == null) return NotFound();
+            var editModel = await _teamService.GetForEditAsync(id.Value);
+            if (editModel == null) return NotFound();
 
-            return View(team);
+            return View(editModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Team team)
+        public async Task<IActionResult> Edit(int id, UpdateTeamDto dto)
         {
-            if (id != team.Id) return NotFound();
-            if (!ModelState.IsValid) return View(team);
+            if (id != dto.Id) return NotFound();
+            if (!ModelState.IsValid) return View(dto);
 
             try
             {
-                await _teamService.UpdateAsync(team);
+                await _teamService.UpdateAsync(dto);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_teamService.TeamExists(team.Id)) return NotFound();
-                else throw;
+                if (!await _teamService.ExistsAsync(dto.Id)) return NotFound();
+                throw;
             }
 
             return RedirectToAction(nameof(Index));
@@ -83,21 +87,25 @@ namespace TaskMind.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _teamService.DeleteAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _teamService.DeleteAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         public async Task<IActionResult> ManageTasks(int? id)
         {
             if (id == null) return NotFound();
 
-            var team = await _teamService.GetByIdAsync(id.Value);
-            if (team == null) return NotFound();
+            var teamTasksModel = await _teamService.GetTeamTasksAsync(id.Value);
+            if (teamTasksModel == null) return NotFound();
 
-            var tasks = await _teamService.GetTasksForTeamAsync(team.Id);
-
-            ViewData["Team"] = team;
-            return View(tasks);
+            return View(teamTasksModel);
         }
     }
 }

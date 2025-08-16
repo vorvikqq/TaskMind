@@ -1,4 +1,6 @@
-﻿using TaskMind.Domain.Models;
+﻿using TaskMind.Application.DTOs;
+using TaskMind.Application.DTOs.Team;
+using TaskMind.Domain.Models;
 
 namespace TaskMind.Application.Services.Interfaces
 {
@@ -6,10 +8,11 @@ namespace TaskMind.Application.Services.Interfaces
     {
         Task<IEnumerable<Team>> GetAllAsync();
         Task<Team?> GetByIdAsync(int id);
-        Task CreateAsync(Team team);
-        Task UpdateAsync(Team team);
+        Task<UpdateTeamDto?> GetForEditAsync(int id);
+        Task<TeamTasksModel?> GetTeamTasksAsync(int teamId);
+        Task CreateAsync(CreateTeamDto dto);
+        Task UpdateAsync(UpdateTeamDto dto);
         Task DeleteAsync(int id);
-        Task<IEnumerable<TaskItem>> GetTasksForTeamAsync(int teamId);
-        bool TeamExists(int id);
+        Task<bool> ExistsAsync(int id);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using TaskMind.Application.DTOs.TaskItem;
 using TaskMind.Application.Mappers;
 using TaskMind.Application.Repositories.Interfaces;
@@ -18,7 +18,6 @@ namespace TaskMind.Application.Services
         {
             _taskItemRepo = taskItemRepo;
             _teamRepo = teamRepo;
-
             _taskStates = Enum.GetValues(typeof(TaskState))
                               .Cast<TaskState>()
                               .Select(ts => new SelectListItem
@@ -29,9 +28,50 @@ namespace TaskMind.Application.Services
                               .ToList();
         }
 
-        public async Task<IEnumerable<TaskItem>> GetAllAsync() => await _taskItemRepo.GetAllAsync();
+        public async Task<IEnumerable<TaskItem>> GetAllAsync()
+            => await _taskItemRepo.GetAllAsync();
 
-        public async Task<TaskItem?> GetByIdAsync(int id) => await _taskItemRepo.GetByIdAsync(id);
+        public async Task<TaskItem?> GetByIdAsync(int id)
+            => await _taskItemRepo.GetByIdAsync(id);
+
+        public async Task<TaskItemCreateModel> GetCreateModelAsync(CreateTaskItemDto? dto = null)
+        {
+            var teams = await _teamRepo.GetAllAsync();
+
+            return new TaskItemCreateModel
+            {
+                TaskItem = dto ?? new CreateTaskItemDto(),
+                Teams = new SelectList(teams, "Id", "Name", dto?.TeamId),
+                TaskStates = _taskStates
+            };
+        }
+
+        public async Task<TaskItemEditModel?> GetEditModelAsync(int id, UpdateTaskItemDto? dto = null)
+        {
+            var taskItem = await _taskItemRepo.GetByIdAsync(id);
+            if (taskItem == null) return null;
+
+            var teams = await _teamRepo.GetAllAsync();
+
+            var updateDto = dto ?? new UpdateTaskItemDto
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                Difficulty = taskItem.Difficulty,
+                RequiredSkills = string.Join(", ", taskItem.RequiredSkills),
+                DeadlineDays = taskItem.DeadlineDays,
+                EstimatedHours = taskItem.EstimatedHours,
+                TeamId = taskItem.TeamId,
+            };
+
+            return new TaskItemEditModel
+            {
+                TaskItem = updateDto,
+                Teams = new SelectList(teams, "Id", "Name", updateDto.TeamId),
+                TaskStates = _taskStates
+            };
+        }
 
         public async Task CreateAsync(CreateTaskItemDto dto)
         {
@@ -39,9 +79,9 @@ namespace TaskMind.Application.Services
             await _taskItemRepo.CreateAsync(taskItem);
         }
 
-        public async Task UpdateAsync(int id, UpdateTaskItemDto dto)
+        public async Task UpdateAsync(UpdateTaskItemDto dto)
         {
-            var taskItem = await _taskItemRepo.GetByIdAsync(id);
+            var taskItem = await _taskItemRepo.GetByIdAsync(dto.Id);
             if (taskItem == null)
                 throw new KeyNotFoundException("Task not found");
 
@@ -49,13 +89,16 @@ namespace TaskMind.Application.Services
             await _taskItemRepo.UpdateAsync(taskItem);
         }
 
-        public Task DeleteAsync(int id) => _taskItemRepo.DeleteAsync(id);
+        public async Task DeleteAsync(int id)
+        {
+            var taskItem = await _taskItemRepo.GetByIdAsync(id);
+            if (taskItem == null)
+                throw new KeyNotFoundException("Task not found");
 
-        public bool TaskItemExists(int id) => _taskItemRepo.IsExist(id);
+            await _taskItemRepo.DeleteAsync(id);
+        }
 
-        public async Task<IEnumerable<Team>> GetAllTeamsAsync() => await _teamRepo.GetAllAsync();
-
-        public IEnumerable<SelectListItem> GetTaskStates() => _taskStates;
+        public async Task<bool> ExistsAsync(int id)
+            => await _taskItemRepo.ExistsAsync(id);
     }
-
 }

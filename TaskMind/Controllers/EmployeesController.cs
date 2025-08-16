@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using TaskMind.Application.DTOs.Employee;
-using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Application.Services.Interfaces;
 
 namespace TaskMind.Controllers
@@ -9,12 +7,10 @@ namespace TaskMind.Controllers
     public class EmployeesController : Controller
     {
         private readonly IEmployeeService _employeeService;
-        private readonly ITeamRepository _teamRepo;
 
-        public EmployeesController(IEmployeeService employeeService, ITeamRepository teamRepo)
+        public EmployeesController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
-            _teamRepo = teamRepo;
         }
 
         public async Task<IActionResult> Index()
@@ -32,7 +28,7 @@ namespace TaskMind.Controllers
 
         public async Task<IActionResult> Create()
         {
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name");
+            ViewData["Team"] = await _employeeService.GetTeamsForDropdownAsync();
             return View();
         }
 
@@ -42,7 +38,7 @@ namespace TaskMind.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", dto.TeamId);
+                ViewData["Team"] = await _employeeService.GetTeamsForDropdownAsync(dto.TeamId);
                 return View(dto);
             }
 
@@ -54,38 +50,29 @@ namespace TaskMind.Controllers
         {
             if (id == null) return NotFound();
 
-            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
-            if (employee == null) return NotFound();
+            var editModel = await _employeeService.GetEmployeeForEditAsync(id.Value);
+            if (editModel == null) return NotFound();
 
-            var dto = new UpdateEmployeeDto
-            {
-                Id = employee.Id,
-                Name = employee.Name,
-                Skills = string.Join(", ", employee.Skills),
-                CurrentWorkload = employee.CurrentWorkload,
-                TaskCompletionSpeed = employee.TaskCompletionSpeed,
-                TeamId = employee.TeamId
-            };
-
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", employee.TeamId);
-            return View(dto);
+            return View(editModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateEmployeeDto dto)
+        public async Task<IActionResult> Edit(int id, EmployeeEditModel model)
         {
-            if (id != dto.Id) return NotFound();
+            if (id != model.Employee.Id) return NotFound();
+
+            TryValidateModel(model.Employee, nameof(model.Employee));
 
             if (!ModelState.IsValid)
             {
-                ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", dto.TeamId);
-                return View(dto);
+                model.Teams = await _employeeService.GetTeamsForDropdownAsync(model.Employee.TeamId);
+                return View(model);
             }
 
             try
             {
-                await _employeeService.UpdateEmployeeAsync(dto);
+                await _employeeService.UpdateEmployeeAsync(model.Employee);
             }
             catch (KeyNotFoundException)
             {
@@ -98,7 +85,6 @@ namespace TaskMind.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-
             var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
             if (employee == null) return NotFound();
 
@@ -109,8 +95,15 @@ namespace TaskMind.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _employeeService.DeleteEmployeeAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _employeeService.DeleteEmployeeAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 

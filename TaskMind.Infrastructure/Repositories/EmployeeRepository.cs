@@ -21,42 +21,41 @@ namespace TaskMind.Infrastructure.Repositories
             return employee;
         }
 
-        public async Task<Employee?> DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (employee is null)
-                return null;
-
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
-
-            return employee;
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee != null)
+            {
+                _context.Employees.Remove(employee);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<List<Employee>> GetAllAsync()
         {
-            return await _context.Employees.Include(e => e.Team).ToListAsync();
+            return await _context.Employees
+                .Include(e => e.Team)
+                .ToListAsync();
         }
 
-        public async Task<Employee> GetByIdAsync(int? id)
+        public async Task<Employee?> GetByIdAsync(int id)
         {
             return await _context.Employees
                 .Include(e => e.Team)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<List<Employee>> GetByTeamIdAsync(int? teamId)
+        public async Task<List<Employee>> GetByTeamIdAsync(int teamId)
         {
             return await _context.Employees
                 .Include(e => e.Team)
-                .Where(e => e.TeamId == teamId).ToListAsync();
+                .Where(e => e.TeamId == teamId)
+                .ToListAsync();
         }
 
-        public bool IsExist(int id)
+        public async Task<bool> ExistsAsync(int id)
         {
-            return _context.Employees.Any(e => e.Id == id);
+            return await _context.Employees.AnyAsync(e => e.Id == id);
         }
 
         public async Task<Employee> UpdateAsync(Employee employee)

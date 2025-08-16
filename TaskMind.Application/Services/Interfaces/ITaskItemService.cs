@@ -1,5 +1,4 @@
-﻿using System.Web.Mvc;
-using TaskMind.Application.DTOs.TaskItem;
+﻿using TaskMind.Application.DTOs.TaskItem;
 using TaskMind.Domain.Models;
 
 
@@ -9,13 +8,12 @@ namespace TaskMind.Application.Services.Interfaces
     {
         Task<IEnumerable<TaskItem>> GetAllAsync();
         Task<TaskItem?> GetByIdAsync(int id);
+        Task<TaskItemCreateModel> GetCreateModelAsync(CreateTaskItemDto? dto = null);
+        Task<TaskItemEditModel?> GetEditModelAsync(int id, UpdateTaskItemDto? dto = null);
         Task CreateAsync(CreateTaskItemDto dto);
-        Task UpdateAsync(int id, UpdateTaskItemDto dto);
+        Task UpdateAsync(UpdateTaskItemDto dto);
         Task DeleteAsync(int id);
-        bool TaskItemExists(int id);
-
-        Task<IEnumerable<Team>> GetAllTeamsAsync();
-        IEnumerable<SelectListItem> GetTaskStates();
+        Task<bool> ExistsAsync(int id);
     }
 
 }

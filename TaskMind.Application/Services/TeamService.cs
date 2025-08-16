@@ -1,4 +1,6 @@
-﻿using TaskMind.Application.Repositories.Interfaces;
+﻿using TaskMind.Application.DTOs;
+using TaskMind.Application.DTOs.Team;
+using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Application.Services.Interfaces;
 using TaskMind.Domain.Models;
 
@@ -15,13 +17,58 @@ namespace TaskMind.Application.Services
             _taskItemRepo = taskItemRepo;
         }
 
-        public async Task<IEnumerable<Team>> GetAllAsync() => await _teamRepo.GetAllAsync();
-        public async Task<Team?> GetByIdAsync(int id) => await _teamRepo.GetByIdAsync(id);
-        public async Task CreateAsync(Team team) => await _teamRepo.CreateAsync(team);
-        public async Task UpdateAsync(Team team) => await _teamRepo.UpdateAsync(team);
-        public async Task DeleteAsync(int id) => await _teamRepo.DeleteAsync(id);
-        public async Task<IEnumerable<TaskItem>> GetTasksForTeamAsync(int teamId) => await _taskItemRepo.GetByTeamIdAsync(teamId);
-        public bool TeamExists(int id) => _teamRepo.IsExist(id);
-    }
+        public async Task<IEnumerable<Team>> GetAllAsync()
+            => await _teamRepo.GetAllAsync();
 
+        public async Task<Team?> GetByIdAsync(int id)
+            => await _teamRepo.GetByIdAsync(id);
+
+        public async Task<UpdateTeamDto?> GetForEditAsync(int id)
+        {
+            var team = await _teamRepo.GetByIdAsync(id);
+            return team == null ? null : new UpdateTeamDto { Id = team.Id, Name = team.Name };
+        }
+
+        public async Task<TeamTasksModel?> GetTeamTasksAsync(int teamId)
+        {
+            var team = await _teamRepo.GetByIdAsync(teamId);
+            if (team == null) return null;
+
+            var tasks = await _taskItemRepo.GetByTeamIdAsync(teamId);
+
+            return new TeamTasksModel
+            {
+                Team = team,
+                Tasks = tasks
+            };
+        }
+
+        public async Task CreateAsync(CreateTeamDto dto)
+        {
+            var team = new Team { Name = dto.Name };
+            await _teamRepo.CreateAsync(team);
+        }
+
+        public async Task UpdateAsync(UpdateTeamDto dto)
+        {
+            var team = await _teamRepo.GetByIdAsync(dto.Id);
+            if (team == null)
+                throw new KeyNotFoundException("Team not found");
+
+            team.Name = dto.Name;
+            await _teamRepo.UpdateAsync(team);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var team = await _teamRepo.GetByIdAsync(id);
+            if (team == null)
+                throw new KeyNotFoundException("Team not found");
+
+            await _teamRepo.DeleteAsync(id);
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+            => await _teamRepo.ExistsAsync(id);
+    }
 }

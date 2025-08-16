@@ -5,12 +5,12 @@ namespace TaskMind.Application.Repositories.Interfaces
 {
     public interface ITaskItemRepository
     {
+        Task<List<TaskItem>> GetAllAsync();
+        Task<TaskItem?> GetByIdAsync(int id);
+        Task<List<TaskItem>> GetByTeamIdAsync(int teamId);
         Task<TaskItem> CreateAsync(TaskItem taskItem);
         Task<TaskItem> UpdateAsync(TaskItem taskItem);
-        Task<TaskItem> DeleteAsync(int id);
-        Task<List<TaskItem>> GetAllAsync();
-        Task<TaskItem> GetByIdAsync(int? id);
-        Task<List<TaskItem>> GetByTeamIdAsync(int? teamId);
-        bool IsExist(int id);
+        Task DeleteAsync(int id);
+        Task<bool> ExistsAsync(int id);
     }
 }

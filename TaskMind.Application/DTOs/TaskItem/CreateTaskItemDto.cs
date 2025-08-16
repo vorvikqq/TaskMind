@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TaskMind.Domain.Constants;
-using TaskMind.Domain.Models;
 
 namespace TaskMind.Application.DTOs.TaskItem
 {
@@ -27,6 +26,6 @@ namespace TaskMind.Application.DTOs.TaskItem
         public TaskState Status { get; set; }
 
         public int TeamId { get; set; }
-        public Team? Team { get; set; }
+        public Domain.Models.Team? Team { get; set; }
     }
 }

@@ -26,16 +26,18 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
+
+// Repositories
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+
+// Services  
 builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-
-
-// Додаємо Refit для взаємодії з API
+builder.Services.AddScoped<IWorkloadCalculationService, WorkloadCalculationService>();
 builder.Services.AddRefitClient<ITaskAssignmentApi>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:8000"));
 

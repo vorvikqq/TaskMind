@@ -1,6 +1,6 @@
-﻿@model List<TaskMind.Domain.Models.TaskItem>
+﻿@model TaskMind.Application.DTOs.TeamTasksModel
 
-<h2>Завдання для команди @ViewBag.Team.Name</h2>
+<h2>Завдання для команди @Model.Team.Name</h2>
 
 <table class="table">
     <thead>
@@ -14,7 +14,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var task in Model)
+        @foreach (var task in Model.Tasks)
         {
             <tr>
                 <td>@task.Title</td>

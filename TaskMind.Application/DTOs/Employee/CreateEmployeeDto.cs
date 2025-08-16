@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TaskMind.Domain.Models;
 
 namespace TaskMind.Application.DTOs.Employee
 {
@@ -13,11 +12,11 @@ namespace TaskMind.Application.DTOs.Employee
         [Range(0.0, 1.0, ErrorMessage = "Current workload must be between 0.0 and 1.0")]
         public double CurrentWorkload { get; set; } = 0;
 
-        [Range(0.01,1.0 , ErrorMessage = "Task completion speed must be greater than 0.01")]
+        [Range(0.01, 1.0, ErrorMessage = "Task completion speed must be greater than 0.01")]
         public double TaskCompletionSpeed { get; set; }
         public string Skills { get; set; } = string.Empty;
         public int? TeamId { get; set; }
-        public Team? Team { get; set; }
+        public Domain.Models.Team? Team { get; set; }
 
     }
 }

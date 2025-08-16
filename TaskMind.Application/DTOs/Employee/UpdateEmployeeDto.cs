@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TaskMind.Domain.Models;
 
 namespace TaskMind.Application.DTOs.Employee
 {
@@ -19,6 +18,6 @@ namespace TaskMind.Application.DTOs.Employee
         public double TaskCompletionSpeed { get; set; }
         public string Skills { get; set; } = string.Empty;
         public int? TeamId { get; set; }
-        public Team? Team { get; set; }
+        public Domain.Models.Team? Team { get; set; }
     }
 }

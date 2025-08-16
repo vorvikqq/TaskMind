@@ -1,4 +1,5 @@
-﻿using TaskMind.Application.Mappers;
+﻿using TaskMind.Application.DTOs.TaskAssignments;
+using TaskMind.Application.Mappers;
 using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Application.Services.Interfaces;
 using TaskMind.Domain.Models;
@@ -10,66 +11,85 @@ namespace TaskMind.Application.Services
         private readonly ITaskAssignmentApi _api;
         private readonly ITaskItemRepository _taskItemRepo;
         private readonly IEmployeeRepository _employeeRepo;
+        private readonly IWorkloadCalculationService _workloadService;
 
-        public TaskAssignmentService(ITaskAssignmentApi api, ITaskItemRepository taskItemRepo, IEmployeeRepository employeeRepo)
+        public TaskAssignmentService(
+            ITaskAssignmentApi api,
+            ITaskItemRepository taskItemRepo,
+            IEmployeeRepository employeeRepo,
+            IWorkloadCalculationService workloadService)
         {
             _api = api;
             _taskItemRepo = taskItemRepo;
             _employeeRepo = employeeRepo;
+            _workloadService = workloadService;
         }
 
-        public async Task<bool> AssignEmployeeAsync(int taskId)
+        public async Task<TaskAssignmentResult> AssignEmployeeAsync(int taskId)
         {
             var task = await _taskItemRepo.GetByIdAsync(taskId);
-            if (task == null) return false;
+            if (task == null)
+                throw new KeyNotFoundException("Task not found");
+
+            if (task.EmployeeId.HasValue)
+                return TaskAssignmentResult.Failed("Task is already assigned");
 
             var employees = await _employeeRepo.GetByTeamIdAsync(task.TeamId);
-            var request = TaskAssignMapper.ToTaskRequestDto(task, employees);
+            if (!employees.Any())
+                return TaskAssignmentResult.Failed("No employees available in the team");
 
+            var request = TaskAssignMapper.ToTaskRequestDto(task, employees);
             var response = await _api.GetBestDeveloper(request);
-            if (response?.BestDeveloper == null) return false;
+
+            if (response?.BestDeveloper == null)
+                return TaskAssignmentResult.Failed("No suitable developer found");
 
             var employee = await _employeeRepo.GetByIdAsync(response.BestDeveloper.DeveloperID);
-            if (employee != null)
-            {
-                var deltaW = CalculateWorkloadChange(task, employee);
-                employee.CurrentWorkload = Math.Min(Math.Round(employee.CurrentWorkload + deltaW, 2), 1);
-                await _employeeRepo.UpdateAsync(employee);
-            }
+            if (employee == null)
+                return TaskAssignmentResult.Failed("Selected developer not found");
 
+            // Update workload
+            var deltaW = _workloadService.CalculateWorkloadChange(task, employee);
+            employee.CurrentWorkload = Math.Min(Math.Round(employee.CurrentWorkload + deltaW, 2), 1);
+            await _employeeRepo.UpdateAsync(employee);
+
+            // Assign task
             task.EmployeeId = response.BestDeveloper.DeveloperID;
             await _taskItemRepo.UpdateAsync(task);
 
-            return true;
+            return TaskAssignmentResult.Successful(response.BestDeveloper.DeveloperID, task.TeamId);
         }
 
-        public async Task<bool> UnassignEmployeeAsync(int taskId)
+        public async Task<TaskAssignmentResult> UnassignEmployeeAsync(int taskId)
         {
             var task = await _taskItemRepo.GetByIdAsync(taskId);
-            if (task == null) return false;
+            if (task == null)
+                throw new KeyNotFoundException("Task not found");
 
-            if (task.EmployeeId.HasValue)
+            if (!task.EmployeeId.HasValue)
+                return TaskAssignmentResult.Failed("Task is not assigned to any employee");
+
+            var employee = await _employeeRepo.GetByIdAsync(task.EmployeeId.Value);
+            if (employee != null)
             {
-                var employee = await _employeeRepo.GetByIdAsync(task.EmployeeId.Value);
-                if (employee != null)
-                {
-                    var deltaW = CalculateWorkloadChange(task, employee);
-                    employee.CurrentWorkload = Math.Max(0, Math.Round(employee.CurrentWorkload - deltaW, 2));
-                    await _employeeRepo.UpdateAsync(employee);
-                }
+                var deltaW = _workloadService.CalculateWorkloadChange(task, employee);
+                employee.CurrentWorkload = Math.Max(0, Math.Round(employee.CurrentWorkload - deltaW, 2));
+                await _employeeRepo.UpdateAsync(employee);
             }
 
             task.EmployeeId = null;
             await _taskItemRepo.UpdateAsync(task);
 
-            return true;
+            return TaskAssignmentResult.Successful(null, task.TeamId);
         }
+    }
 
-        private double CalculateWorkloadChange(TaskItem task, Employee employee)
+    public class WorkloadCalculationService : IWorkloadCalculationService
+    {
+        public double CalculateWorkloadChange(TaskItem task, Employee employee)
         {
             return (Math.Sqrt(task.EstimatedHours) * task.Difficulty) /
                    ((task.DeadlineDays * employee.TaskCompletionSpeed) + 1);
         }
     }
-
 }

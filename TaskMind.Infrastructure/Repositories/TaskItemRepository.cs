@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TaskMind.Infrastructure.Data;
-using TaskMind.Domain.Models;
 using TaskMind.Application.Repositories.Interfaces;
+using TaskMind.Domain.Models;
+using TaskMind.Infrastructure.Data;
 
 namespace TaskMind.Infrastructure.Repositories
 {
@@ -14,59 +14,58 @@ namespace TaskMind.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<TaskItem> CreateAsync(TaskItem task)
-        {
-            await _context.Tasks.AddAsync(task);
-            await _context.SaveChangesAsync();
-            return task;
-        }
-
-        public async Task<TaskItem?> DeleteAsync(int id)
-        {
-            var task = await _context.Tasks
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (task is null)
-                return null;
-
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
-
-            return task;
-        }
-
         public async Task<List<TaskItem>> GetAllAsync()
         {
             return await _context.Tasks
                 .Include(t => t.Team)
+                .Include(t => t.Employee)
                 .ToListAsync();
         }
 
-        public async Task<TaskItem> GetByIdAsync(int? id)
+        public async Task<TaskItem?> GetByIdAsync(int id)
         {
             return await _context.Tasks
                 .Include(t => t.Team)
+                .Include(t => t.Employee)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<List<TaskItem>> GetByTeamIdAsync(int? teamId)
+        public async Task<List<TaskItem>> GetByTeamIdAsync(int teamId)
         {
             return await _context.Tasks
                 .Include(t => t.Team)
-                .Where(t=> t.TeamId == teamId)
+                .Include(t => t.Employee)
+                .Where(t => t.TeamId == teamId)
                 .ToListAsync();
         }
 
-        public bool IsExist(int id)
+        public async Task<TaskItem> CreateAsync(TaskItem taskItem)
         {
-            return _context.Tasks.Any(e => e.Id == id);
+            await _context.Tasks.AddAsync(taskItem);
+            await _context.SaveChangesAsync();
+            return taskItem;
         }
 
-        public async Task<TaskItem> UpdateAsync(TaskItem task)
+        public async Task<TaskItem> UpdateAsync(TaskItem taskItem)
         {
-            _context.Update(task);
+            _context.Update(taskItem);
             await _context.SaveChangesAsync();
-            return task;
+            return taskItem;
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var taskItem = await _context.Tasks.FindAsync(id);
+            if (taskItem != null)
+            {
+                _context.Tasks.Remove(taskItem);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.Tasks.AnyAsync(t => t.Id == id);
         }
     }
 

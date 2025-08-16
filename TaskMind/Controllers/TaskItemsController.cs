@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TaskMind.Application.DTOs.TaskItem;
 using TaskMind.Application.Services.Interfaces;
@@ -30,23 +29,23 @@ namespace TaskMind.Controllers
 
         public async Task<IActionResult> Create()
         {
-            ViewData["TaskState"] = _taskItemService.GetTaskStates();
-            ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name");
-            return View();
+            var createModel = await _taskItemService.GetCreateModelAsync();
+            return View(createModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateTaskItemDto dto)
+        public async Task<IActionResult> Create(TaskItemCreateModel model)
         {
+            TryValidateModel(model.TaskItem, nameof(model.TaskItem));
+
             if (!ModelState.IsValid)
             {
-                ViewData["TaskState"] = _taskItemService.GetTaskStates();
-                ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name", dto.TeamId);
-                return View(dto);
+                var createModel = await _taskItemService.GetCreateModelAsync(model.TaskItem);
+                return View(createModel);
             }
 
-            await _taskItemService.CreateAsync(dto);
+            await _taskItemService.CreateAsync(model.TaskItem);
             return RedirectToAction(nameof(Index));
         }
 
@@ -54,42 +53,30 @@ namespace TaskMind.Controllers
         {
             if (id == null) return NotFound();
 
-            var taskItem = await _taskItemService.GetByIdAsync(id.Value);
-            if (taskItem == null) return NotFound();
+            var editModel = await _taskItemService.GetEditModelAsync(id.Value);
+            if (editModel == null) return NotFound();
 
-            var updateDto = new UpdateTaskItemDto
-            {
-                Id = taskItem.Id,
-                Title = taskItem.Title,
-                Description = taskItem.Description,
-                Difficulty = taskItem.Difficulty,
-                RequiredSkills = string.Join(", ", taskItem.RequiredSkills),
-                DeadlineDays = taskItem.DeadlineDays,
-                EstimatedHours = taskItem.EstimatedHours,
-                TeamId = taskItem.TeamId,
-            };
-
-            ViewData["TaskState"] = _taskItemService.GetTaskStates();
-            ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name", taskItem.TeamId);
-            return View(updateDto);
+            return View(editModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateTaskItemDto dto)
+        public async Task<IActionResult> Edit(int id, TaskItemEditModel model)
         {
-            if (id != dto.Id) return NotFound();
+            if (id != model.TaskItem.Id) return NotFound();
+
+            TryValidateModel(model.TaskItem, nameof(model.TaskItem));
+
 
             if (!ModelState.IsValid)
             {
-                ViewData["TaskState"] = _taskItemService.GetTaskStates();
-                ViewData["Team"] = new SelectList(await _taskItemService.GetAllTeamsAsync(), "Id", "Name", dto.TeamId);
-                return View(dto);
+                var editModel = await _taskItemService.GetEditModelAsync(id, model.TaskItem);
+                return View(editModel);
             }
 
             try
             {
-                await _taskItemService.UpdateAsync(id, dto);
+                await _taskItemService.UpdateAsync(model.TaskItem);
             }
             catch (KeyNotFoundException)
             {
@@ -97,8 +84,8 @@ namespace TaskMind.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_taskItemService.TaskItemExists(dto.Id)) return NotFound();
-                else throw;
+                if (!await _taskItemService.ExistsAsync(model.TaskItem.Id)) return NotFound();
+                throw;
             }
 
             return RedirectToAction(nameof(Index));
@@ -107,10 +94,8 @@ namespace TaskMind.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-
             var taskItem = await _taskItemService.GetByIdAsync(id.Value);
             if (taskItem == null) return NotFound();
-
             return View(taskItem);
         }
 
@@ -118,8 +103,15 @@ namespace TaskMind.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _taskItemService.DeleteAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _taskItemService.DeleteAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }
