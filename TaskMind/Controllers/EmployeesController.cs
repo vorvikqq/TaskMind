@@ -1,92 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using TaskMind.Application.DTOs.Employee;
-using TaskMind.Application.Mappers;
 using TaskMind.Application.Repositories.Interfaces;
+using TaskMind.Application.Services.Interfaces;
 
 namespace TaskMind.Controllers
 {
     public class EmployeesController : Controller
     {
-        private readonly IEmployeeRepository _employeeRepo;
+        private readonly IEmployeeService _employeeService;
         private readonly ITeamRepository _teamRepo;
 
-        public EmployeesController(IEmployeeRepository employeeRepository, ITeamRepository teamRepo)
+        public EmployeesController(IEmployeeService employeeService, ITeamRepository teamRepo)
         {
-            _employeeRepo = employeeRepository;
+            _employeeService = employeeService;
             _teamRepo = teamRepo;
         }
 
-        // GET: Employees
         public async Task<IActionResult> Index()
-        {
-            
-            return View(await _employeeRepo.GetAllAsync());
-        }
+            => View(await _employeeService.GetAllEmployeesAsync());
 
-        // GET: Employees/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var employee = await _employeeRepo.GetByIdAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
+            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
+            if (employee == null) return NotFound();
 
             return View(employee);
         }
 
-        // GET: Employees/Create
         public async Task<IActionResult> Create()
         {
             ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name");
             return View();
         }
 
-        // POST: Employees/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateEmployeeDto createEmployeeDto)
+        public async Task<IActionResult> Create(CreateEmployeeDto dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var employee = createEmployeeDto.ToEmployeeFromCreate(); // Використовуємо маппер
-                await _employeeRepo.CreateAsync(employee);
-                return RedirectToAction(nameof(Index));
+                ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", dto.TeamId);
+                return View(dto);
             }
 
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", createEmployeeDto.TeamId);
-            return View(createEmployeeDto);
+            await _employeeService.CreateEmployeeAsync(dto);
+            return RedirectToAction(nameof(Index));
         }
 
-
-        // GET: Employees/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var employee = await _employeeRepo.GetByIdAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
+            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
+            if (employee == null) return NotFound();
 
-            var updateEmployeeDto = new UpdateEmployeeDto
+            var dto = new UpdateEmployeeDto
             {
                 Id = employee.Id,
                 Name = employee.Name,
@@ -97,80 +68,50 @@ namespace TaskMind.Controllers
             };
 
             ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", employee.TeamId);
-            return View(updateEmployeeDto);
+            return View(dto);
         }
-        // POST: Employees/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateEmployeeDto updateEmployeeDto)
+        public async Task<IActionResult> Edit(int id, UpdateEmployeeDto dto)
         {
-            if (id != updateEmployeeDto.Id)
+            if (id != dto.Id) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", dto.TeamId);
+                return View(dto);
+            }
+
+            try
+            {
+                await _employeeService.UpdateEmployeeAsync(dto);
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                var employee = await _employeeRepo.GetByIdAsync(id);
-                if (employee == null)
-                {
-                    return NotFound();
-                }
-
-                employee.UpdateEmployeeFromDto(updateEmployeeDto);
-
-                try
-                {
-                   await _employeeRepo.UpdateAsync(employee);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmployeeExists(employee.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["Team"] = new SelectList(await _teamRepo.GetAllAsync(), "Id", "Name", updateEmployeeDto.TeamId);
-            return View(updateEmployeeDto);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Employees/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var employee = await _employeeRepo.GetByIdAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
+            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
+            if (employee == null) return NotFound();
 
             return View(employee);
         }
 
-        // POST: Employees/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _employeeRepo.DeleteAsync(id);
+            await _employeeService.DeleteEmployeeAsync(id);
             return RedirectToAction(nameof(Index));
         }
-
-        private bool EmployeeExists(int id)
-        {
-            return _employeeRepo.IsExist(id);
-        }
     }
+
 }
