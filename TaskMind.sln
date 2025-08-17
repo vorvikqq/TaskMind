@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{19B69E0D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMind.Application.Tests", "TaskMind.Application.Tests\TaskMind.Application.Tests.csproj", "{FE1B26D8-561A-44EC-BDD3-A4C8F64458A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMind.Infrastructure.Tests", "TaskMind.Infrastructure.Tests\TaskMind.Infrastructure.Tests.csproj", "{36CEFFD7-3C17-425A-9259-A01ABF534679}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{FE1B26D8-561A-44EC-BDD3-A4C8F64458A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE1B26D8-561A-44EC-BDD3-A4C8F64458A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE1B26D8-561A-44EC-BDD3-A4C8F64458A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36CEFFD7-3C17-425A-9259-A01ABF534679}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36CEFFD7-3C17-425A-9259-A01ABF534679}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36CEFFD7-3C17-425A-9259-A01ABF534679}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36CEFFD7-3C17-425A-9259-A01ABF534679}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +69,7 @@ Global
 		{AD1C7B22-7557-4CE3-B17A-9B0C7878EEA7} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{38262FA2-0F1B-4DAA-A6CD-02F19AEB9F35} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FE1B26D8-561A-44EC-BDD3-A4C8F64458A6} = {19B69E0D-3013-4F2B-BC4F-09D032FD8E58}
+		{36CEFFD7-3C17-425A-9259-A01ABF534679} = {19B69E0D-3013-4F2B-BC4F-09D032FD8E58}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {66B28C8B-349E-4CB6-8B9A-A36E8496299A}
