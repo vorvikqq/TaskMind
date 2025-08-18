@@ -21,10 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TaskMind.Application\TaskMind.Application.csproj" />
-    <ProjectReference Include="..\TaskMind.Domain\TaskMind.Domain.csproj" />
-    <ProjectReference Include="..\TaskMind.Infrastructure\TaskMind.Infrastructure.csproj" />
-    <ProjectReference Include="..\TaskMind\TaskMind.Web.csproj" />
+    <ProjectReference Include="..\..\src\TaskMind.Application\TaskMind.Application.csproj" />
+    <ProjectReference Include="..\..\src\TaskMind.Infrastructure\TaskMind.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\TaskMind.Web\TaskMind.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

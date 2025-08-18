@@ -20,7 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TaskMind.Application\TaskMind.Application.csproj" />
+    <ProjectReference Include="..\..\src\TaskMind.Application\TaskMind.Application.csproj" />
+    <ProjectReference Include="..\..\src\TaskMind.Domain\TaskMind.Domain.csproj" />
+    <ProjectReference Include="..\..\src\TaskMind.Infrastructure\TaskMind.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
