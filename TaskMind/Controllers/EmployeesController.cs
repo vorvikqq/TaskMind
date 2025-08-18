@@ -13,9 +13,11 @@ namespace TaskMind.Controllers
             _employeeService = employeeService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
             => View(await _employeeService.GetAllEmployeesAsync());
 
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -26,6 +28,7 @@ namespace TaskMind.Controllers
             return View(employee);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             ViewData["Team"] = await _employeeService.GetTeamsForDropdownAsync();
@@ -46,6 +49,7 @@ namespace TaskMind.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -82,6 +86,7 @@ namespace TaskMind.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();

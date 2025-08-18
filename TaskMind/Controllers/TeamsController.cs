@@ -14,9 +14,11 @@ namespace TaskMind.Controllers
             _teamService = teamService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
             => View(await _teamService.GetAllAsync());
 
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -27,6 +29,7 @@ namespace TaskMind.Controllers
             return View(team);
         }
 
+        [HttpGet]
         public IActionResult Create() => View();
 
         [HttpPost]
@@ -39,6 +42,7 @@ namespace TaskMind.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -73,6 +77,7 @@ namespace TaskMind.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -98,6 +103,7 @@ namespace TaskMind.Controllers
             }
         }
 
+        [HttpGet]
         public async Task<IActionResult> ManageTasks(int? id)
         {
             if (id == null) return NotFound();

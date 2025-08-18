@@ -13,12 +13,14 @@ namespace TaskMind.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             ViewData["ActivePage"] = "Home";
             return View();
         }
 
+        [HttpGet]
         public IActionResult Privacy()
         {
             ViewData["ActivePage"] = "Privacy";

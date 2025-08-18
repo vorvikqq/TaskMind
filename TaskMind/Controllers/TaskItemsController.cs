@@ -14,9 +14,11 @@ namespace TaskMind.Controllers
             _taskItemService = taskItemService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
             => View(await _taskItemService.GetAllAsync());
 
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -27,6 +29,7 @@ namespace TaskMind.Controllers
             return View(taskItem);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             var createModel = await _taskItemService.GetCreateModelAsync();
@@ -49,6 +52,7 @@ namespace TaskMind.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -91,6 +95,7 @@ namespace TaskMind.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
