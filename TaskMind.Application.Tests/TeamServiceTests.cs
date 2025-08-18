@@ -206,7 +206,7 @@ namespace TaskMind.Application.Tests
         public async Task CreateAsync_ShouldCallRepositoryCreate()
         {
             // Arrange
-            var createDto = new CreateTeamDto { Name = "New Team" };
+            var createDto = new CreateTeamRequest { Name = "New Team" };
 
             // Act
             await _teamService.CreateAsync(createDto);
@@ -219,7 +219,7 @@ namespace TaskMind.Application.Tests
         public async Task CreateAsync_ShouldCreateTeamWithCorrectName()
         {
             // Arrange
-            var createDto = new CreateTeamDto { Name = "Quality Assurance Team" };
+            var createDto = new CreateTeamRequest { Name = "Quality Assurance Team" };
             Team? capturedTeam = null;
             _mockTeamRepo.Setup(x => x.CreateAsync(It.IsAny<Team>()))
                         .Callback<Team>(team => capturedTeam = team);
@@ -241,7 +241,7 @@ namespace TaskMind.Application.Tests
         public async Task UpdateAsync_WhenTeamExists_ShouldUpdateTeam()
         {
             // Arrange
-            var updateDto = new UpdateTeamDto { Id = 1, Name = "Updated Team Name" };
+            var updateDto = new UpdateTeamRequest { Id = 1, Name = "Updated Team Name" };
             var existingTeam = new Team { Id = 1, Name = "Old Team Name" };
 
             _mockTeamRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
@@ -260,7 +260,7 @@ namespace TaskMind.Application.Tests
         public async Task UpdateAsync_WhenTeamNotExists_ShouldThrowKeyNotFoundException()
         {
             // Arrange
-            var updateDto = new UpdateTeamDto { Id = 999, Name = "Non-existent Team" };
+            var updateDto = new UpdateTeamRequest { Id = 999, Name = "Non-existent Team" };
             _mockTeamRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
                         .ReturnsAsync((Team?)null);
 

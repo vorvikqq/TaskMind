@@ -30,16 +30,16 @@ namespace TaskMind.Application.Services
             return new SelectList(teams, "Id", "Name", selectedTeamId);
         }
 
-        public async Task<EmployeeEditModel?> GetEmployeeForEditAsync(int id)
+        public async Task<EditEmployeeResponse?> GetEmployeeForEditAsync(int id)
         {
             var employee = await _employeeRepo.GetByIdAsync(id);
             if (employee == null) return null;
 
             var teams = await GetTeamsForDropdownAsync(employee.TeamId);
 
-            return new EmployeeEditModel
+            return new EditEmployeeResponse
             {
-                Employee = new UpdateEmployeeDto
+                Employee = new UpdateEmployeeRequest
                 {
                     Id = employee.Id,
                     Name = employee.Name,
@@ -52,13 +52,13 @@ namespace TaskMind.Application.Services
             };
         }
 
-        public async Task CreateEmployeeAsync(CreateEmployeeDto dto)
+        public async Task CreateEmployeeAsync(CreateEmployeeRequest dto)
         {
             var employee = dto.ToEmployeeFromCreate();
             await _employeeRepo.CreateAsync(employee);
         }
 
-        public async Task UpdateEmployeeAsync(UpdateEmployeeDto dto)
+        public async Task UpdateEmployeeAsync(UpdateEmployeeRequest dto)
         {
             var employee = await _employeeRepo.GetByIdAsync(dto.Id);
             if (employee == null)

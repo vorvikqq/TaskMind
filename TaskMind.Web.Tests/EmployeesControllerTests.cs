@@ -214,7 +214,7 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WithValidModel_ShouldCreateEmployeeAndRedirectToIndex()
         {
             // Arrange
-            var createDto = new CreateEmployeeDto
+            var createDto = new CreateEmployeeRequest
             {
                 Name = "New Employee",
                 Skills = "C#, React",
@@ -239,7 +239,7 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WithInvalidModel_ShouldReturnViewWithModelAndTeams()
         {
             // Arrange
-            var createDto = new CreateEmployeeDto
+            var createDto = new CreateEmployeeRequest
             {
                 Name = "", // Invalid - empty name
                 TeamId = 1
@@ -268,7 +268,7 @@ namespace TaskMind.Web.Tests
             viewResult.Model.Should().BeEquivalentTo(createDto);
             viewResult.ViewData["Team"].Should().BeEquivalentTo(selectList);
 
-            _mockEmployeeService.Verify(s => s.CreateEmployeeAsync(It.IsAny<CreateEmployeeDto>()), Times.Never);
+            _mockEmployeeService.Verify(s => s.CreateEmployeeAsync(It.IsAny<CreateEmployeeRequest>()), Times.Never);
             _mockEmployeeService.Verify(s => s.GetTeamsForDropdownAsync(createDto.TeamId), Times.Once);
         }
 
@@ -276,7 +276,7 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WhenServiceThrowsException_ShouldPropagateException()
         {
             // Arrange
-            var createDto = new CreateEmployeeDto
+            var createDto = new CreateEmployeeRequest
             {
                 Name = "Test Employee",
                 TeamId = 1
@@ -310,9 +310,9 @@ namespace TaskMind.Web.Tests
             var selectList = new SelectList(teamsData, "Id", "Name");
 
 
-            var editModel = new EmployeeEditModel
+            var editModel = new EditEmployeeResponse
             {
-                Employee = new UpdateEmployeeDto { Id = employeeId, Name = "John Doe", TeamId = 1 },
+                Employee = new UpdateEmployeeRequest { Id = employeeId, Name = "John Doe", TeamId = 1 },
                 Teams = selectList
             };
 
@@ -325,7 +325,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeAssignableTo<EmployeeEditModel>().Subject;
+            var model = viewResult.Model.Should().BeAssignableTo<EditEmployeeResponse>().Subject;
             model.Employee.Id.Should().Be(employeeId);
             model.Employee.Name.Should().Be("John Doe");
             model.Teams.Should().HaveCount(2);
@@ -351,7 +351,7 @@ namespace TaskMind.Web.Tests
             var employeeId = 999;
             _mockEmployeeService
                 .Setup(s => s.GetEmployeeForEditAsync(employeeId))
-                .ReturnsAsync((EmployeeEditModel?)null);
+                .ReturnsAsync((EditEmployeeResponse?)null);
 
             // Act
             var result = await _controller.Edit(employeeId);
@@ -370,9 +370,9 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var employeeId = 1;
-            var editModel = new EmployeeEditModel
+            var editModel = new EditEmployeeResponse
             {
-                Employee = new UpdateEmployeeDto
+                Employee = new UpdateEmployeeRequest
                 {
                     Id = employeeId,
                     Name = "Updated Employee",
@@ -403,9 +403,9 @@ namespace TaskMind.Web.Tests
             // Arrange
             var routeId = 1;
             var modelId = 2;
-            var editModel = new EmployeeEditModel
+            var editModel = new EditEmployeeResponse
             {
-                Employee = new UpdateEmployeeDto { Id = modelId, Name = "Test" }
+                Employee = new UpdateEmployeeRequest { Id = modelId, Name = "Test" }
             };
 
             // Act
@@ -413,7 +413,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
-            _mockEmployeeService.Verify(s => s.UpdateEmployeeAsync(It.IsAny<UpdateEmployeeDto>()), Times.Never);
+            _mockEmployeeService.Verify(s => s.UpdateEmployeeAsync(It.IsAny<UpdateEmployeeRequest>()), Times.Never);
         }
 
         [Fact]
@@ -421,9 +421,9 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var employeeId = 1;
-            var editModel = new EmployeeEditModel
+            var editModel = new EditEmployeeResponse
             {
-                Employee = new UpdateEmployeeDto { Id = employeeId, Name = "Updated Employee" }
+                Employee = new UpdateEmployeeRequest { Id = employeeId, Name = "Updated Employee" }
             };
 
             _mockEmployeeService

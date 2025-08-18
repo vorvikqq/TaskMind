@@ -2,7 +2,7 @@
 {
     public class TaskRequestDto
     {
-        public TaskDto Task { get; set; }
-        public List<DeveloperDto> Developers { get; set; }
+        public AssignTaskRequest Task { get; set; }
+        public List<DeveloperResponse> Developers { get; set; }
     }
 }

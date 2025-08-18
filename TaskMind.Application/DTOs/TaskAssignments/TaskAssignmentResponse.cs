@@ -1,18 +1,18 @@
 ﻿namespace TaskMind.Application.DTOs.TaskAssignments
 {
-    public class TaskAssignmentResult
+    public class TaskAssignmentResponse
     {
         public bool Success { get; private set; }
         public string? ErrorMessage { get; private set; }
         public int? AssignedEmployeeId { get; private set; }
         public int TeamId { get; private set; }
 
-        private TaskAssignmentResult() { }
+        private TaskAssignmentResponse() { }
 
 
-        public static TaskAssignmentResult Successful(int? employeeId, int teamId)
+        public static TaskAssignmentResponse Successful(int? employeeId, int teamId)
         {
-            return new TaskAssignmentResult
+            return new TaskAssignmentResponse
             {
                 Success = true,
                 AssignedEmployeeId = employeeId,
@@ -20,9 +20,9 @@
             };
         }
 
-        public static TaskAssignmentResult Failed(string errorMessage)
+        public static TaskAssignmentResponse Failed(string errorMessage)
         {
-            return new TaskAssignmentResult
+            return new TaskAssignmentResponse
             {
                 Success = false,
                 ErrorMessage = errorMessage

@@ -31,7 +31,7 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateTeamDto dto)
+        public async Task<IActionResult> Create(CreateTeamRequest dto)
         {
             if (!ModelState.IsValid) return View(dto);
 
@@ -51,7 +51,7 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateTeamDto dto)
+        public async Task<IActionResult> Edit(int id, UpdateTeamRequest dto)
         {
             if (id != dto.Id) return NotFound();
             if (!ModelState.IsValid) return View(dto);

@@ -155,7 +155,7 @@ namespace TaskMind.Application.Tests
         };
             var apiResponse = new BestDeveloperResponse
             {
-                BestDeveloper = new DeveloperDto { DeveloperID = 999 }
+                BestDeveloper = new DeveloperResponse { DeveloperID = 999 }
             };
 
             _mockTaskItemRepo.Setup(x => x.GetByIdAsync(taskId))
@@ -203,7 +203,7 @@ namespace TaskMind.Application.Tests
             var employees = new List<Employee> { employee };
             var apiResponse = new BestDeveloperResponse
             {
-                BestDeveloper = new DeveloperDto { DeveloperID = employeeId }
+                BestDeveloper = new DeveloperResponse { DeveloperID = employeeId }
             };
             var workloadDelta = 0.2;
 
@@ -254,7 +254,7 @@ namespace TaskMind.Application.Tests
             var employees = new List<Employee> { employee };
             var apiResponse = new BestDeveloperResponse
             {
-                BestDeveloper = new DeveloperDto { DeveloperID = employeeId }
+                BestDeveloper = new DeveloperResponse { DeveloperID = employeeId }
             };
             var workloadDelta = 0.5; // Would result in 1.3
 

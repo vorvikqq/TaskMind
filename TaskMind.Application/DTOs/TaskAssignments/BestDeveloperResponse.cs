@@ -2,6 +2,6 @@
 {
     public class BestDeveloperResponse
     {
-        public DeveloperDto BestDeveloper { get; set; }
+        public DeveloperResponse BestDeveloper { get; set; }
     }
 }

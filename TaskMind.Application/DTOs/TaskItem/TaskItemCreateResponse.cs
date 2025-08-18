@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TaskMind.Application.DTOs.TaskItem
 {
-    public class TaskItemCreateModel
+    public class TaskItemCreateResponse
     {
-        public CreateTaskItemDto TaskItem { get; set; } = null!;
+        public CreateTaskItemRequest TaskItem { get; set; } = null!;
         [ValidateNever]
         public SelectList Teams { get; set; } = null!;
         [ValidateNever]

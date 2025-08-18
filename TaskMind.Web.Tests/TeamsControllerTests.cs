@@ -183,7 +183,7 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WithValidModel_ShouldCreateTeamAndRedirectToIndex()
         {
             // Arrange
-            var createDto = new CreateTeamDto
+            var createDto = new CreateTeamRequest
             {
                 Name = "New Team"
             };
@@ -206,7 +206,7 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WithInvalidModel_ShouldReturnViewWithModel()
         {
             // Arrange
-            var createDto = new CreateTeamDto
+            var createDto = new CreateTeamRequest
             {
                 Name = "" // Invalid - empty name
             };
@@ -220,14 +220,14 @@ namespace TaskMind.Web.Tests
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             viewResult.Model.Should().BeEquivalentTo(createDto);
 
-            _mockTeamService.Verify(s => s.CreateAsync(It.IsAny<CreateTeamDto>()), Times.Never);
+            _mockTeamService.Verify(s => s.CreateAsync(It.IsAny<CreateTeamRequest>()), Times.Never);
         }
 
         [Fact]
         public async Task Create_POST_WhenServiceThrowsException_ShouldPropagateException()
         {
             // Arrange
-            var createDto = new CreateTeamDto
+            var createDto = new CreateTeamRequest
             {
                 Name = "Test Team"
             };
@@ -250,7 +250,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var teamId = 1;
-            var editModel = new UpdateTeamDto
+            var editModel = new UpdateTeamRequest
             {
                 Id = teamId,
                 Name = "Development Team"
@@ -265,7 +265,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeAssignableTo<UpdateTeamDto>().Subject;
+            var model = viewResult.Model.Should().BeAssignableTo<UpdateTeamRequest>().Subject;
             model.Id.Should().Be(teamId);
             model.Name.Should().Be("Development Team");
 
@@ -290,7 +290,7 @@ namespace TaskMind.Web.Tests
             var teamId = 999;
             _mockTeamService
                 .Setup(s => s.GetForEditAsync(teamId))
-                .ReturnsAsync((UpdateTeamDto?)null);
+                .ReturnsAsync((UpdateTeamRequest?)null);
 
             // Act
             var result = await _controller.Edit(teamId);
@@ -309,7 +309,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var teamId = 1;
-            var updateDto = new UpdateTeamDto
+            var updateDto = new UpdateTeamRequest
             {
                 Id = teamId,
                 Name = "Updated Team Name"
@@ -335,7 +335,7 @@ namespace TaskMind.Web.Tests
             // Arrange
             var routeId = 1;
             var modelId = 2;
-            var updateDto = new UpdateTeamDto
+            var updateDto = new UpdateTeamRequest
             {
                 Id = modelId,
                 Name = "Test Team"
@@ -346,7 +346,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
-            _mockTeamService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTeamDto>()), Times.Never);
+            _mockTeamService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTeamRequest>()), Times.Never);
         }
 
         [Fact]
@@ -354,7 +354,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var teamId = 1;
-            var updateDto = new UpdateTeamDto
+            var updateDto = new UpdateTeamRequest
             {
                 Id = teamId,
                 Name = "" // Invalid - empty name
@@ -369,7 +369,7 @@ namespace TaskMind.Web.Tests
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             viewResult.Model.Should().BeEquivalentTo(updateDto);
 
-            _mockTeamService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTeamDto>()), Times.Never);
+            _mockTeamService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTeamRequest>()), Times.Never);
         }
 
         [Fact]
@@ -377,7 +377,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var teamId = 1;
-            var updateDto = new UpdateTeamDto
+            var updateDto = new UpdateTeamRequest
             {
                 Id = teamId,
                 Name = "Updated Team"
@@ -518,7 +518,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var teamId = 1;
-            var teamTasksModel = new TeamTasksModel
+            var teamTasksModel = new TeamTaskResponse
             {
                 Team = new Team { Id = teamId, Name = "Development Team" },
                 Tasks = new List<TaskItem>
@@ -537,7 +537,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeAssignableTo<TeamTasksModel>().Subject;
+            var model = viewResult.Model.Should().BeAssignableTo<TeamTaskResponse>().Subject;
             model.Team.Id.Should().Be(teamId);
             model.Team.Name.Should().Be("Development Team");
             model.Tasks.Should().HaveCount(2);
@@ -563,7 +563,7 @@ namespace TaskMind.Web.Tests
             var teamId = 999;
             _mockTeamService
                 .Setup(s => s.GetTeamTasksAsync(teamId))
-                .ReturnsAsync((TeamTasksModel?)null);
+                .ReturnsAsync((TeamTaskResponse?)null);
 
             // Act
             var result = await _controller.ManageTasks(teamId);

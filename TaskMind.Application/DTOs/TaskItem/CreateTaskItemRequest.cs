@@ -3,7 +3,7 @@ using TaskMind.Domain.Constants;
 
 namespace TaskMind.Application.DTOs.TaskItem
 {
-    public class CreateTaskItemDto
+    public class CreateTaskItemRequest
     {
         [Required]
         [MaxLength(200, ErrorMessage = "Title cannot be longer than 200 characters.")]

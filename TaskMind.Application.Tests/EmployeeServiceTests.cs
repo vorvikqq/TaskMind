@@ -213,7 +213,7 @@ namespace TaskMind.Application.Tests
         public async Task CreateEmployeeAsync_ShouldCallRepositoryCreate()
         {
             // Arrange
-            var createDto = new CreateEmployeeDto
+            var createDto = new CreateEmployeeRequest
             {
                 Name = "New Employee",
                 Skills = "C#, SQL",
@@ -237,7 +237,7 @@ namespace TaskMind.Application.Tests
         public async Task UpdateEmployeeAsync_WhenEmployeeExists_ShouldUpdateEmployee()
         {
             // Arrange
-            var updateDto = new UpdateEmployeeDto
+            var updateDto = new UpdateEmployeeRequest
             {
                 Id = 1,
                 Name = "Updated Name",
@@ -271,7 +271,7 @@ namespace TaskMind.Application.Tests
         public async Task UpdateEmployeeAsync_WhenEmployeeNotExists_ShouldThrowKeyNotFoundException()
         {
             // Arrange
-            var updateDto = new UpdateEmployeeDto { Id = 999 };
+            var updateDto = new UpdateEmployeeRequest { Id = 999 };
             _mockEmployeeRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
                             .ReturnsAsync((Employee?)null);
 

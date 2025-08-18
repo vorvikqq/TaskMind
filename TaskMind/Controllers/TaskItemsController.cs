@@ -35,7 +35,7 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(TaskItemCreateModel model)
+        public async Task<IActionResult> Create(TaskItemCreateResponse model)
         {
             TryValidateModel(model.TaskItem, nameof(model.TaskItem));
 
@@ -61,7 +61,7 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, TaskItemEditModel model)
+        public async Task<IActionResult> Edit(int id, TaskItemEditResponse model)
         {
             if (id != model.TaskItem.Id) return NotFound();
 

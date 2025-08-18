@@ -5,7 +5,7 @@ namespace TaskMind.Application.Mappers
 {
     public static class EmployeeMapper
     {
-        public static Employee ToEmployeeFromCreate(this CreateEmployeeDto createEmployeeDto)
+        public static Employee ToEmployeeFromCreate(this CreateEmployeeRequest createEmployeeDto)
         {
             return new Employee
             {
@@ -17,7 +17,7 @@ namespace TaskMind.Application.Mappers
             };
         }
 
-        public static void UpdateEmployeeFromDto(this Employee employee, UpdateEmployeeDto updateEmployeeDto)
+        public static void UpdateEmployeeFromDto(this Employee employee, UpdateEmployeeRequest updateEmployeeDto)
         {
             employee.Name = updateEmployeeDto.Name;
             employee.Skills = ParseSkills(updateEmployeeDto.Skills);

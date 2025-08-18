@@ -23,33 +23,33 @@ namespace TaskMind.Application.Services
         public async Task<Team?> GetByIdAsync(int id)
             => await _teamRepo.GetByIdAsync(id);
 
-        public async Task<UpdateTeamDto?> GetForEditAsync(int id)
+        public async Task<UpdateTeamRequest?> GetForEditAsync(int id)
         {
             var team = await _teamRepo.GetByIdAsync(id);
-            return team == null ? null : new UpdateTeamDto { Id = team.Id, Name = team.Name };
+            return team == null ? null : new UpdateTeamRequest { Id = team.Id, Name = team.Name };
         }
 
-        public async Task<TeamTasksModel?> GetTeamTasksAsync(int teamId)
+        public async Task<TeamTaskResponse?> GetTeamTasksAsync(int teamId)
         {
             var team = await _teamRepo.GetByIdAsync(teamId);
             if (team == null) return null;
 
             var tasks = await _taskItemRepo.GetByTeamIdAsync(teamId);
 
-            return new TeamTasksModel
+            return new TeamTaskResponse
             {
                 Team = team,
                 Tasks = tasks
             };
         }
 
-        public async Task CreateAsync(CreateTeamDto dto)
+        public async Task CreateAsync(CreateTeamRequest dto)
         {
             var team = new Team { Name = dto.Name };
             await _teamRepo.CreateAsync(team);
         }
 
-        public async Task UpdateAsync(UpdateTeamDto dto)
+        public async Task UpdateAsync(UpdateTeamRequest dto)
         {
             var team = await _teamRepo.GetByIdAsync(dto.Id);
             if (team == null)

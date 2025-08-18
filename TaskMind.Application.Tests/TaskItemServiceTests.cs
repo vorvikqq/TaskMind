@@ -143,7 +143,7 @@ namespace TaskMind.Application.Tests
             // Assert
             result.Should().NotBeNull();
             result.TaskItem.Should().NotBeNull();
-            result.TaskItem.Should().BeOfType<CreateTaskItemDto>();
+            result.TaskItem.Should().BeOfType<CreateTaskItemRequest>();
             result.Teams.Should().NotBeNull();
             result.TaskStates.Should().NotBeNull();
             result.TaskStates.Should().NotBeEmpty();
@@ -163,7 +163,7 @@ namespace TaskMind.Application.Tests
             new() { Id = 1, Name = "Team 1" },
             new() { Id = 2, Name = "Team 2" }
         };
-            var dto = new CreateTaskItemDto
+            var dto = new CreateTaskItemRequest
             {
                 Title = "Test Task",
                 TeamId = 2
@@ -259,7 +259,7 @@ namespace TaskMind.Application.Tests
             // Arrange
             var taskId = 1;
             var taskItem = new TaskItem { Id = taskId, Title = "Existing Task" };
-            var providedDto = new UpdateTaskItemDto
+            var providedDto = new UpdateTaskItemRequest
             {
                 Id = taskId,
                 Title = "Updated Title",
@@ -305,7 +305,7 @@ namespace TaskMind.Application.Tests
         public async Task CreateAsync_ShouldCallRepositoryCreate()
         {
             // Arrange
-            var createDto = new CreateTaskItemDto
+            var createDto = new CreateTaskItemRequest
             {
                 Title = "New Task",
                 Description = "Task Description"
@@ -326,7 +326,7 @@ namespace TaskMind.Application.Tests
         public async Task UpdateAsync_WhenTaskExists_ShouldUpdateTask()
         {
             // Arrange
-            var updateDto = new UpdateTaskItemDto
+            var updateDto = new UpdateTaskItemRequest
             {
                 Id = 1,
                 Title = "Updated Task",
@@ -354,7 +354,7 @@ namespace TaskMind.Application.Tests
         public async Task UpdateAsync_WhenTaskNotExists_ShouldThrowKeyNotFoundException()
         {
             // Arrange
-            var updateDto = new UpdateTaskItemDto { Id = 999 };
+            var updateDto = new UpdateTaskItemRequest { Id = 999 };
             _mockTaskItemRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
                             .ReturnsAsync((TaskItem?)null);
 

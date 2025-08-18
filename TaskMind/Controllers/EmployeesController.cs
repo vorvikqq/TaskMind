@@ -34,7 +34,7 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateEmployeeDto dto)
+        public async Task<IActionResult> Create(CreateEmployeeRequest dto)
         {
             if (!ModelState.IsValid)
             {
@@ -58,7 +58,7 @@ namespace TaskMind.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EmployeeEditModel model)
+        public async Task<IActionResult> Edit(int id, EditEmployeeResponse model)
         {
             if (id != model.Employee.Id) return NotFound();
 

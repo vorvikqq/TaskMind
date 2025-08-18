@@ -27,7 +27,7 @@ namespace TaskMind.Web.Tests
             var taskId = 1;
             var employeeId = 5;
             var teamId = 2;
-            var successResult = TaskAssignmentResult.Successful(employeeId, teamId);
+            var successResult = TaskAssignmentResponse.Successful(employeeId, teamId);
 
             _mockTaskAssignmentService
                 .Setup(s => s.AssignEmployeeAsync(taskId))
@@ -51,7 +51,7 @@ namespace TaskMind.Web.Tests
             // Arrange
             var taskId = 1;
             var teamId = 2;
-            var successResult = TaskAssignmentResult.Successful(null, teamId);
+            var successResult = TaskAssignmentResponse.Successful(null, teamId);
 
             _mockTaskAssignmentService
                 .Setup(s => s.AssignEmployeeAsync(taskId))
@@ -75,7 +75,7 @@ namespace TaskMind.Web.Tests
             // Arrange
             var taskId = 1;
             var errorMessage = "No available employees with required skills";
-            var failedResult = TaskAssignmentResult.Failed(errorMessage);
+            var failedResult = TaskAssignmentResponse.Failed(errorMessage);
 
             _mockTaskAssignmentService
                 .Setup(s => s.AssignEmployeeAsync(taskId))
@@ -166,7 +166,7 @@ namespace TaskMind.Web.Tests
             // Arrange
             var taskId = 1;
             var teamId = 2;
-            var successResult = TaskAssignmentResult.Successful(null, teamId);
+            var successResult = TaskAssignmentResponse.Successful(null, teamId);
 
             _mockTaskAssignmentService
                 .Setup(s => s.UnassignEmployeeAsync(taskId))
@@ -190,7 +190,7 @@ namespace TaskMind.Web.Tests
             // Arrange
             var taskId = 1;
             var errorMessage = "Task is not assigned to any employee";
-            var failedResult = TaskAssignmentResult.Failed(errorMessage);
+            var failedResult = TaskAssignmentResponse.Failed(errorMessage);
 
             _mockTaskAssignmentService
                 .Setup(s => s.UnassignEmployeeAsync(taskId))
@@ -283,7 +283,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var errorMessage = $"Invalid task ID: {invalidTaskId}";
-            var failedResult = TaskAssignmentResult.Failed(errorMessage);
+            var failedResult = TaskAssignmentResponse.Failed(errorMessage);
 
             _mockTaskAssignmentService
                 .Setup(s => s.AssignEmployeeAsync(invalidTaskId))
@@ -308,7 +308,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var errorMessage = $"Invalid task ID: {invalidTaskId}";
-            var failedResult = TaskAssignmentResult.Failed(errorMessage);
+            var failedResult = TaskAssignmentResponse.Failed(errorMessage);
 
             _mockTaskAssignmentService
                 .Setup(s => s.UnassignEmployeeAsync(invalidTaskId))

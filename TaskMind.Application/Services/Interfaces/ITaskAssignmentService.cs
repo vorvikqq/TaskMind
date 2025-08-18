@@ -4,7 +4,7 @@ namespace TaskMind.Application.Services.Interfaces
 {
     public interface ITaskAssignmentService
     {
-        Task<TaskAssignmentResult> AssignEmployeeAsync(int taskId);
-        Task<TaskAssignmentResult> UnassignEmployeeAsync(int taskId);
+        Task<TaskAssignmentResponse> AssignEmployeeAsync(int taskId);
+        Task<TaskAssignmentResponse> UnassignEmployeeAsync(int taskId);
     }
 }

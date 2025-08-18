@@ -9,9 +9,9 @@ namespace TaskMind.Application.Services.Interfaces
         Task<IEnumerable<Employee>> GetAllEmployeesAsync();
         Task<Employee?> GetEmployeeByIdAsync(int id);
         Task<SelectList> GetTeamsForDropdownAsync(int? selectedTeamId = null);
-        Task<EmployeeEditModel?> GetEmployeeForEditAsync(int id);
-        Task CreateEmployeeAsync(CreateEmployeeDto dto);
-        Task UpdateEmployeeAsync(UpdateEmployeeDto dto);
+        Task<EditEmployeeResponse?> GetEmployeeForEditAsync(int id);
+        Task CreateEmployeeAsync(CreateEmployeeRequest dto);
+        Task UpdateEmployeeAsync(UpdateEmployeeRequest dto);
         Task DeleteEmployeeAsync(int id);
         Task<bool> ExistsAsync(int id);
     }

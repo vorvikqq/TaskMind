@@ -1,6 +1,6 @@
 ﻿namespace TaskMind.Application.DTOs.TaskAssignments
 {
-    public class TaskDto
+    public class AssignTaskRequest
     {
         public int TaskID { get; set; }
         public double Difficulty { get; set; }

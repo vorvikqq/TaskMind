@@ -2,10 +2,8 @@
 
 namespace TaskMind.Application.DTOs.Employee
 {
-    public class UpdateEmployeeDto
+    public class CreateEmployeeRequest
     {
-        public int Id { get; set; }
-
         [Required]
         [MinLength(2, ErrorMessage = "Name must be at least 2 characters long.")]
         [MaxLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
@@ -19,5 +17,6 @@ namespace TaskMind.Application.DTOs.Employee
         public string Skills { get; set; } = string.Empty;
         public int? TeamId { get; set; }
         public Domain.Models.Team? Team { get; set; }
+
     }
 }

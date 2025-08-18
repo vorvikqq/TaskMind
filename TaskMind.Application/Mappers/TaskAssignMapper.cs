@@ -13,9 +13,9 @@ namespace TaskMind.Application.Mappers
                 Developers = employees.Select(e => e.ToDeveloperDto()).ToList()
             };
         }
-        public static TaskDto ToTaskDto(this TaskItem task)
+        public static AssignTaskRequest ToTaskDto(this TaskItem task)
         {
-            return new TaskDto
+            return new AssignTaskRequest
             {
                 TaskID = task.Id,
                 Difficulty = task.Difficulty,
@@ -25,9 +25,9 @@ namespace TaskMind.Application.Mappers
             };
         }
 
-        public static DeveloperDto ToDeveloperDto(this Employee employee)
+        public static DeveloperResponse ToDeveloperDto(this Employee employee)
         {
-            return new DeveloperDto
+            return new DeveloperResponse
             {
                 DeveloperID = employee.Id,
                 DeveloperSkills = employee.Skills, 

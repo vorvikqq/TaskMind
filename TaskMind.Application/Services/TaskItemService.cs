@@ -34,26 +34,26 @@ namespace TaskMind.Application.Services
         public async Task<TaskItem?> GetByIdAsync(int id)
             => await _taskItemRepo.GetByIdAsync(id);
 
-        public async Task<TaskItemCreateModel> GetCreateModelAsync(CreateTaskItemDto? dto = null)
+        public async Task<TaskItemCreateResponse> GetCreateModelAsync(CreateTaskItemRequest? dto = null)
         {
             var teams = await _teamRepo.GetAllAsync();
 
-            return new TaskItemCreateModel
+            return new TaskItemCreateResponse
             {
-                TaskItem = dto ?? new CreateTaskItemDto(),
+                TaskItem = dto ?? new CreateTaskItemRequest(),
                 Teams = new SelectList(teams, "Id", "Name", dto?.TeamId),
                 TaskStates = _taskStates
             };
         }
 
-        public async Task<TaskItemEditModel?> GetEditModelAsync(int id, UpdateTaskItemDto? dto = null)
+        public async Task<TaskItemEditResponse?> GetEditModelAsync(int id, UpdateTaskItemRequest? dto = null)
         {
             var taskItem = await _taskItemRepo.GetByIdAsync(id);
             if (taskItem == null) return null;
 
             var teams = await _teamRepo.GetAllAsync();
 
-            var updateDto = dto ?? new UpdateTaskItemDto
+            var updateDto = dto ?? new UpdateTaskItemRequest
             {
                 Id = taskItem.Id,
                 Title = taskItem.Title,
@@ -65,7 +65,7 @@ namespace TaskMind.Application.Services
                 TeamId = taskItem.TeamId,
             };
 
-            return new TaskItemEditModel
+            return new TaskItemEditResponse
             {
                 TaskItem = updateDto,
                 Teams = new SelectList(teams, "Id", "Name", updateDto.TeamId),
@@ -73,13 +73,13 @@ namespace TaskMind.Application.Services
             };
         }
 
-        public async Task CreateAsync(CreateTaskItemDto dto)
+        public async Task CreateAsync(CreateTaskItemRequest dto)
         {
             var taskItem = dto.ToTaskItemFromCreate();
             await _taskItemRepo.CreateAsync(taskItem);
         }
 
-        public async Task UpdateAsync(UpdateTaskItemDto dto)
+        public async Task UpdateAsync(UpdateTaskItemRequest dto)
         {
             var taskItem = await _taskItemRepo.GetByIdAsync(dto.Id);
             if (taskItem == null)

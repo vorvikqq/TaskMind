@@ -186,9 +186,9 @@ namespace TaskMind.Web.Tests
             new SelectListItem { Value = "1", Text = "In Progress" }
         };
 
-            var createModel = new TaskItemCreateModel
+            var createModel = new TaskItemCreateResponse
             {
-                TaskItem = new CreateTaskItemDto(),
+                TaskItem = new CreateTaskItemRequest(),
                 Teams = new SelectList(teamsData, "Id", "Name"),
                 TaskStates = taskStates
             };
@@ -202,7 +202,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeAssignableTo<TaskItemCreateModel>().Subject;
+            var model = viewResult.Model.Should().BeAssignableTo<TaskItemCreateResponse>().Subject;
             model.Teams.Should().HaveCount(2);
             model.TaskStates.Should().HaveCount(2);
 
@@ -213,9 +213,9 @@ namespace TaskMind.Web.Tests
         public async Task Create_GET_WhenNoTeams_ShouldReturnViewWithEmptyTeamsDropdown()
         {
             // Arrange
-            var createModel = new TaskItemCreateModel
+            var createModel = new TaskItemCreateResponse
             {
-                TaskItem = new CreateTaskItemDto(),
+                TaskItem = new CreateTaskItemRequest(),
                 Teams = new SelectList(Enumerable.Empty<SelectListItem>()),
                 TaskStates = new List<SelectListItem>()
             };
@@ -229,7 +229,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeAssignableTo<TaskItemCreateModel>().Subject;
+            var model = viewResult.Model.Should().BeAssignableTo<TaskItemCreateResponse>().Subject;
             model.Teams.Should().BeEmpty();
         }
 
@@ -241,7 +241,7 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WithValidModel_ShouldCreateTaskItemAndRedirectToIndex()
         {
             // Arrange
-            var createDto = new CreateTaskItemDto
+            var createDto = new CreateTaskItemRequest
             {
                 Title = "New Task",
                 Description = "Task Description",
@@ -253,7 +253,7 @@ namespace TaskMind.Web.Tests
                 TeamId = 1
             };
 
-            var model = new TaskItemCreateModel
+            var model = new TaskItemCreateResponse
             {
                 TaskItem = createDto
             };
@@ -276,13 +276,13 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WithInvalidModel_ShouldReturnViewWithModelAndDropdowns()
         {
             // Arrange
-            var createDto = new CreateTaskItemDto
+            var createDto = new CreateTaskItemRequest
             {
                 Title = "", // Invalid - empty title
                 TeamId = 1
             };
 
-            var model = new TaskItemCreateModel
+            var model = new TaskItemCreateResponse
             {
                 TaskItem = createDto
             };
@@ -292,7 +292,7 @@ namespace TaskMind.Web.Tests
             new Team { Id = 1, Name = "Development Team" }
         };
 
-            var createModelWithDropdowns = new TaskItemCreateModel
+            var createModelWithDropdowns = new TaskItemCreateResponse
             {
                 TaskItem = createDto,
                 Teams = new SelectList(teamsData, "Id", "Name"),
@@ -310,11 +310,11 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var resultModel = viewResult.Model.Should().BeAssignableTo<TaskItemCreateModel>().Subject;
+            var resultModel = viewResult.Model.Should().BeAssignableTo<TaskItemCreateResponse>().Subject;
             resultModel.TaskItem.Should().BeEquivalentTo(createDto);
             resultModel.Teams.Should().HaveCount(1);
 
-            _mockTaskItemService.Verify(s => s.CreateAsync(It.IsAny<CreateTaskItemDto>()), Times.Never);
+            _mockTaskItemService.Verify(s => s.CreateAsync(It.IsAny<CreateTaskItemRequest>()), Times.Never);
             _mockTaskItemService.Verify(s => s.GetCreateModelAsync(createDto), Times.Once);
         }
 
@@ -322,14 +322,14 @@ namespace TaskMind.Web.Tests
         public async Task Create_POST_WhenServiceThrowsException_ShouldPropagateException()
         {
             // Arrange
-            var createDto = new CreateTaskItemDto
+            var createDto = new CreateTaskItemRequest
             {
                 Title = "Test Task",
                 Description = "Test Description",
                 TeamId = 1
             };
 
-            var model = new TaskItemCreateModel
+            var model = new TaskItemCreateResponse
             {
                 TaskItem = createDto
             };
@@ -353,7 +353,7 @@ namespace TaskMind.Web.Tests
             // Arrange
             var taskItemId = 1;
 
-            var updateDto = new UpdateTaskItemDto
+            var updateDto = new UpdateTaskItemRequest
             {
                 Id = taskItemId,
                 Title = "Edit Task",
@@ -372,7 +372,7 @@ namespace TaskMind.Web.Tests
             new Team { Id = 2, Name = "QA Team" }
         };
 
-            var editModel = new TaskItemEditModel
+            var editModel = new TaskItemEditResponse
             {
                 TaskItem = updateDto,
                 Teams = new SelectList(teamsData, "Id", "Name"),
@@ -388,7 +388,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeAssignableTo<TaskItemEditModel>().Subject;
+            var model = viewResult.Model.Should().BeAssignableTo<TaskItemEditResponse>().Subject;
             model.TaskItem.Id.Should().Be(taskItemId);
             model.TaskItem.Title.Should().Be("Edit Task");
             model.Teams.Should().HaveCount(2);
@@ -414,7 +414,7 @@ namespace TaskMind.Web.Tests
             var taskItemId = 999;
             _mockTaskItemService
                 .Setup(s => s.GetEditModelAsync(taskItemId, null))
-                .ReturnsAsync((TaskItemEditModel?)null);
+                .ReturnsAsync((TaskItemEditResponse?)null);
 
             // Act
             var result = await _controller.Edit(taskItemId);
@@ -433,7 +433,7 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var taskItemId = 1;
-            var updateDto = new UpdateTaskItemDto
+            var updateDto = new UpdateTaskItemRequest
             {
                 Id = taskItemId,
                 Title = "Updated Task",
@@ -446,7 +446,7 @@ namespace TaskMind.Web.Tests
                 TeamId = 2
             };
 
-            var model = new TaskItemEditModel
+            var model = new TaskItemEditResponse
             {
                 TaskItem = updateDto
             };
@@ -471,13 +471,13 @@ namespace TaskMind.Web.Tests
             // Arrange
             var routeId = 1;
             var modelId = 2;
-            var updateDto = new UpdateTaskItemDto
+            var updateDto = new UpdateTaskItemRequest
             {
                 Id = modelId,
                 Title = "Test Task"
             };
 
-            var model = new TaskItemEditModel
+            var model = new TaskItemEditResponse
             {
                 TaskItem = updateDto
             };
@@ -487,7 +487,7 @@ namespace TaskMind.Web.Tests
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
-            _mockTaskItemService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTaskItemDto>()), Times.Never);
+            _mockTaskItemService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTaskItemRequest>()), Times.Never);
         }
 
         [Fact]
@@ -495,14 +495,14 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var taskItemId = 1;
-            var updateDto = new UpdateTaskItemDto
+            var updateDto = new UpdateTaskItemRequest
             {
                 Id = taskItemId,
                 Title = "", // Invalid - empty title
                 TeamId = 1
             };
 
-            var model = new TaskItemEditModel
+            var model = new TaskItemEditResponse
             {
                 TaskItem = updateDto
             };
@@ -512,7 +512,7 @@ namespace TaskMind.Web.Tests
             new Team { Id = 1, Name = "Development Team" }
         };
 
-            var editModelWithDropdowns = new TaskItemEditModel
+            var editModelWithDropdowns = new TaskItemEditResponse
             {
                 TaskItem = updateDto,
                 Teams = new SelectList(teamsData, "Id", "Name"),
@@ -530,11 +530,11 @@ namespace TaskMind.Web.Tests
 
             // Assert
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var resultModel = viewResult.Model.Should().BeAssignableTo<TaskItemEditModel>().Subject;
+            var resultModel = viewResult.Model.Should().BeAssignableTo<TaskItemEditResponse>().Subject;
             resultModel.TaskItem.Should().BeEquivalentTo(updateDto);
             resultModel.Teams.Should().HaveCount(1);
 
-            _mockTaskItemService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTaskItemDto>()), Times.Never);
+            _mockTaskItemService.Verify(s => s.UpdateAsync(It.IsAny<UpdateTaskItemRequest>()), Times.Never);
             _mockTaskItemService.Verify(s => s.GetEditModelAsync(taskItemId, updateDto), Times.Once);
         }
 
@@ -543,13 +543,13 @@ namespace TaskMind.Web.Tests
         {
             // Arrange
             var taskItemId = 1;
-            var updateDto = new UpdateTaskItemDto
+            var updateDto = new UpdateTaskItemRequest
             {
                 Id = taskItemId,
                 Title = "Updated Task"
             };
 
-            var model = new TaskItemEditModel
+            var model = new TaskItemEditResponse
             {
                 TaskItem = updateDto
             };

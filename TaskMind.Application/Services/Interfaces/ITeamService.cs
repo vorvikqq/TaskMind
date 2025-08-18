@@ -8,10 +8,10 @@ namespace TaskMind.Application.Services.Interfaces
     {
         Task<IEnumerable<Team>> GetAllAsync();
         Task<Team?> GetByIdAsync(int id);
-        Task<UpdateTeamDto?> GetForEditAsync(int id);
-        Task<TeamTasksModel?> GetTeamTasksAsync(int teamId);
-        Task CreateAsync(CreateTeamDto dto);
-        Task UpdateAsync(UpdateTeamDto dto);
+        Task<UpdateTeamRequest?> GetForEditAsync(int id);
+        Task<TeamTaskResponse?> GetTeamTasksAsync(int teamId);
+        Task CreateAsync(CreateTeamRequest dto);
+        Task UpdateAsync(UpdateTeamRequest dto);
         Task DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
     }

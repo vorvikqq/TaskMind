@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TaskMind.Application.DTOs.Employee
 {
-    public class EmployeeEditModel
+    public class EditEmployeeResponse
     {
-        public UpdateEmployeeDto Employee { get; set; } = null!;
+        public UpdateEmployeeRequest Employee { get; set; } = null!;
         [ValidateNever]
         public SelectList Teams { get; set; } = null!;
     }

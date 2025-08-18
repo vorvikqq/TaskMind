@@ -25,28 +25,28 @@ namespace TaskMind.Application.Services
             _workloadService = workloadService;
         }
 
-        public async Task<TaskAssignmentResult> AssignEmployeeAsync(int taskId)
+        public async Task<TaskAssignmentResponse> AssignEmployeeAsync(int taskId)
         {
             var task = await _taskItemRepo.GetByIdAsync(taskId);
             if (task == null)
                 throw new KeyNotFoundException("Task not found");
 
             if (task.EmployeeId.HasValue)
-                return TaskAssignmentResult.Failed("Task is already assigned");
+                return TaskAssignmentResponse.Failed("Task is already assigned");
 
             var employees = await _employeeRepo.GetByTeamIdAsync(task.TeamId);
             if (!employees.Any())
-                return TaskAssignmentResult.Failed("No employees available in the team");
+                return TaskAssignmentResponse.Failed("No employees available in the team");
 
             var request = TaskAssignMapper.ToTaskRequestDto(task, employees);
             var response = await _api.GetBestDeveloper(request);
 
             if (response?.BestDeveloper == null)
-                return TaskAssignmentResult.Failed("No suitable developer found");
+                return TaskAssignmentResponse.Failed("No suitable developer found");
 
             var employee = await _employeeRepo.GetByIdAsync(response.BestDeveloper.DeveloperID);
             if (employee == null)
-                return TaskAssignmentResult.Failed("Selected developer not found");
+                return TaskAssignmentResponse.Failed("Selected developer not found");
 
             // Update workload
             var deltaW = _workloadService.CalculateWorkloadChange(task, employee);
@@ -57,17 +57,17 @@ namespace TaskMind.Application.Services
             task.EmployeeId = response.BestDeveloper.DeveloperID;
             await _taskItemRepo.UpdateAsync(task);
 
-            return TaskAssignmentResult.Successful(response.BestDeveloper.DeveloperID, task.TeamId);
+            return TaskAssignmentResponse.Successful(response.BestDeveloper.DeveloperID, task.TeamId);
         }
 
-        public async Task<TaskAssignmentResult> UnassignEmployeeAsync(int taskId)
+        public async Task<TaskAssignmentResponse> UnassignEmployeeAsync(int taskId)
         {
             var task = await _taskItemRepo.GetByIdAsync(taskId);
             if (task == null)
                 throw new KeyNotFoundException("Task not found");
 
             if (!task.EmployeeId.HasValue)
-                return TaskAssignmentResult.Failed("Task is not assigned to any employee");
+                return TaskAssignmentResponse.Failed("Task is not assigned to any employee");
 
             var employee = await _employeeRepo.GetByIdAsync(task.EmployeeId.Value);
             if (employee != null)
@@ -80,7 +80,7 @@ namespace TaskMind.Application.Services
             task.EmployeeId = null;
             await _taskItemRepo.UpdateAsync(task);
 
-            return TaskAssignmentResult.Successful(null, task.TeamId);
+            return TaskAssignmentResponse.Successful(null, task.TeamId);
         }
     }
 

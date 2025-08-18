@@ -3,7 +3,7 @@ using TaskMind.Domain.Constants;
 
 namespace TaskMind.Application.DTOs.TaskItem
 {
-    public class UpdateTaskItemDto
+    public class UpdateTaskItemRequest
     {
         public int Id { get; set; }
 
