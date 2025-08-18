@@ -32,7 +32,7 @@ namespace TaskMind.Infrastructure.Data
                 .HasForeignKey(e => e.TeamId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Конверсія List<string> в JSON для RequiredSkills у TaskItem
+            // Convert List<string> to JSON for RequiredSkills in TaskItem
             builder.Entity<TaskItem>()
                 .Property(t => t.RequiredSkills)
                 .HasConversion(
@@ -40,7 +40,7 @@ namespace TaskMind.Infrastructure.Data
                     v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()
                 );
 
-            // Конверсія List<string> в JSON для Skills у Employee
+            // Convert List<string> to JSON for Skills in Employee
             builder.Entity<Employee>()
                 .Property(e => e.Skills)
                 .HasConversion(
