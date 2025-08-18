@@ -9,10 +9,10 @@ from tensorflow.keras.losses import MeanSquaredError
 
 app = FastAPI()
 
-model = load_model("task_assignment_model.h5", custom_objects={"mae": MeanSquaredError()})
-scaler = joblib.load("scaler.pkl")
-mlb = joblib.load("mlb.pkl")
-feature_names = joblib.load("feature_names.pkl")
+model = load_model("ml_assets/task_assignment_model.h5", custom_objects={"mae": MeanSquaredError()})
+scaler = joblib.load("ml_assets/scaler.pkl")
+mlb = joblib.load("ml_assets/mlb.pkl")
+feature_names = joblib.load("ml_assets/feature_names.pkl")
 
 class TaskInput(BaseModel):
     task: dict
