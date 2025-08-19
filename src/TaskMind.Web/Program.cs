@@ -4,6 +4,7 @@ using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Application.Services;
 using TaskMind.Application.Services.Interfaces;
 using TaskMind.Infrastructure.Data;
+using TaskMind.Infrastructure.Extensions;
 using TaskMind.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,5 +59,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
+app.MigrateDatabase<ApplicationDbContext>();
 
 app.Run();
