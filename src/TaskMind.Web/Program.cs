@@ -13,7 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString,
+    options.UseNpgsql(connectionString,
         b => b.MigrationsAssembly("TaskMind.Infrastructure")));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
