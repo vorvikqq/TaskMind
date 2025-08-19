@@ -35,6 +35,7 @@ namespace TaskMind.Infrastructure.Repositories
         {
             return await _context.Employees
                 .Include(e => e.Team)
+                .OrderBy(e => e.Id)
                 .ToListAsync();
         }
 
@@ -50,6 +51,7 @@ namespace TaskMind.Infrastructure.Repositories
             return await _context.Employees
                 .Include(e => e.Team)
                 .Where(e => e.TeamId == teamId)
+                .OrderBy(e => e.Id)
                 .ToListAsync();
         }
 

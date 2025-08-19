@@ -19,6 +19,7 @@ namespace TaskMind.Infrastructure.Repositories
             return await _context.Teams
                 .Include(t => t.Employees)
                 .Include(t => t.Tasks)
+                .OrderBy(t => t.Id)
                 .ToListAsync();
         }
 
