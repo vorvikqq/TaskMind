@@ -33,7 +33,7 @@ builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IWorkloadCalculationService, WorkloadCalculationService>();
 builder.Services.AddRefitClient<ITaskAssignmentApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:8000"));
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://api:8000"));
 
 var app = builder.Build();
 
