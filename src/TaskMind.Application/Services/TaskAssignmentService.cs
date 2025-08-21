@@ -55,7 +55,7 @@ namespace TaskMind.Application.Services
 
             // Assign task
             task.EmployeeId = response.BestDeveloper.DeveloperID;
-            await _taskItemRepo.UpdateAsync(task);
+            await _taskItemRepo.UpdateAsync(task.Id, task);
 
             return TaskAssignmentResponse.Successful(response.BestDeveloper.DeveloperID, task.TeamId);
         }
@@ -78,7 +78,7 @@ namespace TaskMind.Application.Services
             }
 
             task.EmployeeId = null;
-            await _taskItemRepo.UpdateAsync(task);
+            await _taskItemRepo.UpdateAsync(task.Id, task);
 
             return TaskAssignmentResponse.Successful(null, task.TeamId);
         }

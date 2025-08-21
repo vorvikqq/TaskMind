@@ -17,6 +17,7 @@ namespace TaskMind.Infrastructure.Repositories
         public async Task<List<TaskItem>> GetAllAsync()
         {
             return await _context.Tasks
+                .AsNoTracking()
                 .Include(t => t.Team)
                 .Include(t => t.Employee)
                 .OrderBy(e => e.Id)
@@ -26,6 +27,7 @@ namespace TaskMind.Infrastructure.Repositories
         public async Task<TaskItem?> GetByIdAsync(int id)
         {
             return await _context.Tasks
+                .AsNoTracking()
                 .Include(t => t.Team)
                 .Include(t => t.Employee)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -34,6 +36,7 @@ namespace TaskMind.Infrastructure.Repositories
         public async Task<List<TaskItem>> GetByTeamIdAsync(int teamId)
         {
             return await _context.Tasks
+                .AsNoTracking()
                 .Include(t => t.Team)
                 .Include(t => t.Employee)
                 .Where(t => t.TeamId == teamId)
@@ -48,21 +51,27 @@ namespace TaskMind.Infrastructure.Repositories
             return taskItem;
         }
 
-        public async Task<TaskItem> UpdateAsync(TaskItem taskItem)
+        public async Task<int> UpdateAsync(int id, TaskItem taskItem)
         {
-            _context.Update(taskItem);
-            await _context.SaveChangesAsync();
-            return taskItem;
+            return await _context.Tasks
+                .Where(t => t.Id == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Title, taskItem.Title)
+                    .SetProperty(t => t.Description, taskItem.Description)
+                    .SetProperty(t => t.Difficulty, taskItem.Difficulty)
+                    .SetProperty(t => t.RequiredSkills, taskItem.RequiredSkills)
+                    .SetProperty(t => t.DeadlineDays, taskItem.DeadlineDays)
+                    .SetProperty(t => t.EstimatedHours, taskItem.EstimatedHours)
+                    .SetProperty(t => t.Status, taskItem.Status)
+                    .SetProperty(t => t.TeamId, taskItem.TeamId)
+                 );
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            var taskItem = await _context.Tasks.FindAsync(id);
-            if (taskItem != null)
-            {
-                _context.Tasks.Remove(taskItem);
-                await _context.SaveChangesAsync();
-            }
+            return await _context.Tasks
+                .Where(t => t.Id == id)
+                .ExecuteDeleteAsync();
         }
 
         public async Task<bool> ExistsAsync(int id)
