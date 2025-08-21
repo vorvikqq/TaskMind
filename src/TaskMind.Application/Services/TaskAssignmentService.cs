@@ -51,7 +51,7 @@ namespace TaskMind.Application.Services
             // Update workload
             var deltaW = _workloadService.CalculateWorkloadChange(task, employee);
             employee.CurrentWorkload = Math.Min(Math.Round(employee.CurrentWorkload + deltaW, 2), 1);
-            await _employeeRepo.UpdateAsync(employee);
+            await _employeeRepo.UpdateAsync(employee.Id, employee);
 
             // Assign task
             task.EmployeeId = response.BestDeveloper.DeveloperID;
@@ -74,7 +74,7 @@ namespace TaskMind.Application.Services
             {
                 var deltaW = _workloadService.CalculateWorkloadChange(task, employee);
                 employee.CurrentWorkload = Math.Max(0, Math.Round(employee.CurrentWorkload - deltaW, 2));
-                await _employeeRepo.UpdateAsync(employee);
+                await _employeeRepo.UpdateAsync(employee.Id, employee);
             }
 
             task.EmployeeId = null;
