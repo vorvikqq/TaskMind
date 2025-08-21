@@ -253,7 +253,7 @@ namespace TaskMind.Application.Tests
             // Assert
             existingTeam.Name.Should().Be("Updated Team Name");
             _mockTeamRepo.Verify(x => x.GetByIdAsync(updateDto.Id), Times.Once);
-            _mockTeamRepo.Verify(x => x.UpdateAsync(existingTeam), Times.Once);
+            _mockTeamRepo.Verify(x => x.UpdateAsync(existingTeam.Id, existingTeam), Times.Once);
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace TaskMind.Application.Tests
                 () => _teamService.UpdateAsync(updateDto));
 
             exception.Message.Should().Be("Team not found");
-            _mockTeamRepo.Verify(x => x.UpdateAsync(It.IsAny<Team>()), Times.Never);
+            _mockTeamRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never);
         }
 
         #endregion

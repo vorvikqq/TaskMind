@@ -347,7 +347,7 @@ namespace TaskMind.Application.Tests
 
             // Assert
             _mockTaskItemRepo.Verify(x => x.GetByIdAsync(updateDto.Id), Times.Once);
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(existingTask), Times.Once);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(existingTask.Id, existingTask), Times.Once);
         }
 
         [Fact]
@@ -363,7 +363,7 @@ namespace TaskMind.Application.Tests
                 () => _taskItemService.UpdateAsync(updateDto));
 
             exception.Message.Should().Be("Task not found");
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(It.IsAny<TaskItem>()), Times.Never);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<TaskItem>()), Times.Never);
         }
 
         #endregion

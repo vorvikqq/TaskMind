@@ -319,15 +319,10 @@ namespace TaskMind.Infrastructure.Tests
             employee.TeamId = 2;
 
             // Act
-            var result = await _repository.UpdateAsync(employee);
+            var result = await _repository.UpdateAsync(employee.Id, employee);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Name.Should().Be("Updated Name");
-            result.Skills.Should().BeEquivalentTo(new List<string> { "C#", "React", "SQL" });
-            result.CurrentWorkload.Should().Be(0.8);
-            result.TaskCompletionSpeed.Should().Be(9.0);
-            result.TeamId.Should().Be(2);
+            result.Should().Be(5);
 
             // Verify in database
             var employeeInDb = await _context.Employees.FindAsync(employee.Id);
@@ -340,7 +335,7 @@ namespace TaskMind.Infrastructure.Tests
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnUpdatedEmployee()
+        public async Task UpdateAsync_ShouldReturnUpdatedEmployeeRows()
         {
             // Arrange
             var employee = new Employee
@@ -357,11 +352,10 @@ namespace TaskMind.Infrastructure.Tests
             employee.Name = "Modified Employee";
 
             // Act
-            var result = await _repository.UpdateAsync(employee);
+            var result = await _repository.UpdateAsync(employee.Id, employee);
 
             // Assert
-            result.Should().BeSameAs(employee);
-            result.Name.Should().Be("Modified Employee");
+            result.Should().Be(1);
         }
 
         #endregion

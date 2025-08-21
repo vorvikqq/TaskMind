@@ -264,7 +264,7 @@ namespace TaskMind.Application.Tests
 
             // Assert
             _mockEmployeeRepo.Verify(x => x.GetByIdAsync(updateDto.Id), Times.Once);
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(existingEmployee), Times.Once);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(existingEmployee.Id, existingEmployee), Times.Once);
         }
 
         [Fact]
@@ -280,7 +280,7 @@ namespace TaskMind.Application.Tests
                 () => _employeeService.UpdateEmployeeAsync(updateDto));
 
             exception.Message.Should().Be("Employee not found");
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(It.IsAny<Employee>()), Times.Never);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<Employee>()), Times.Never);
         }
 
         #endregion

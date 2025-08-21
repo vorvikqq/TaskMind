@@ -15,8 +15,8 @@ namespace TaskMind.Infrastructure.Tests
         public TeamRepositoryTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
+               .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+               .Options;
 
             _context = new ApplicationDbContext(options);
             _repository = new TeamRepository(_context);
@@ -315,11 +315,10 @@ namespace TaskMind.Infrastructure.Tests
             team.Name = "Updated Name";
 
             // Act
-            var result = await _repository.UpdateAsync(team);
+            var result = await _repository.UpdateAsync(team.Id, team);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Name.Should().Be("Updated Name");
+            result.Should().Be(1);
 
             // Verify in database
             var teamInDb = await _context.Teams.FindAsync(team.Id);
@@ -328,7 +327,7 @@ namespace TaskMind.Infrastructure.Tests
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnUpdatedTeam()
+        public async Task UpdateAsync_ShouldReturnUpdatedTeamRows()
         {
             // Arrange
             var team = new Team
@@ -341,11 +340,10 @@ namespace TaskMind.Infrastructure.Tests
             team.Name = "Modified Team";
 
             // Act
-            var result = await _repository.UpdateAsync(team);
+            var result = await _repository.UpdateAsync(team.Id, team);
 
             // Assert
-            result.Should().BeSameAs(team);
-            result.Name.Should().Be("Modified Team");
+            result.Should().Be(1);
         }
 
         #endregion

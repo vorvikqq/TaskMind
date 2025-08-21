@@ -442,18 +442,10 @@ namespace TaskMind.Infrastructure.Tests
             task.EmployeeId = employee.Id;
 
             // Act
-            var result = await _repository.UpdateAsync(task);
+            var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Title.Should().Be("Updated Title");
-            result.Description.Should().Be("Updated Description");
-            result.Difficulty.Should().Be(7.0);
-            result.RequiredSkills.Should().BeEquivalentTo(new[] { "C#", "React", "SQL" });
-            result.DeadlineDays.Should().Be(10);
-            result.EstimatedHours.Should().Be(50);
-            result.Status.Should().Be(TaskState.InProgress);
-            result.EmployeeId.Should().Be(employee.Id);
+            result.Should().Be(8);
 
             // Verify in database
             var taskInDb = await _context.Tasks.FindAsync(task.Id);
@@ -469,7 +461,7 @@ namespace TaskMind.Infrastructure.Tests
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnUpdatedTask()
+        public async Task UpdateAsync_ShouldReturnUpdatedTaskRows()
         {
             // Arrange
             var team = new Team { Name = "Test Team" };
@@ -488,11 +480,10 @@ namespace TaskMind.Infrastructure.Tests
             task.Title = "Modified Task";
 
             // Act
-            var result = await _repository.UpdateAsync(task);
+            var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.Should().BeSameAs(task);
-            result.Title.Should().Be("Modified Task");
+            result.Should().Be(1);
         }
 
 
@@ -523,12 +514,9 @@ namespace TaskMind.Infrastructure.Tests
             task.Status = TaskState.New;
 
             // Act
-            var result = await _repository.UpdateAsync(task);
+            var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.EmployeeId.Should().BeNull();
-            result.Status.Should().Be(TaskState.New);
-
             var taskInDb = await _context.Tasks.FindAsync(task.Id);
             taskInDb!.EmployeeId.Should().BeNull();
         }
