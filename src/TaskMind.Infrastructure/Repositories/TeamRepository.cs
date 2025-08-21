@@ -17,6 +17,7 @@ namespace TaskMind.Infrastructure.Repositories
         public async Task<List<Team>> GetAllAsync()
         {
             return await _context.Teams
+                .AsNoTracking()
                 .Include(t => t.Employees)
                 .Include(t => t.Tasks)
                 .OrderBy(t => t.Id)
@@ -26,6 +27,7 @@ namespace TaskMind.Infrastructure.Repositories
         public async Task<Team?> GetByIdAsync(int id)
         {
             return await _context.Teams
+                .AsNoTracking()
                 .Include(t => t.Employees)
                 .Include(t => t.Tasks)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -38,21 +40,19 @@ namespace TaskMind.Infrastructure.Repositories
             return team;
         }
 
-        public async Task<Team> UpdateAsync(Team team)
+        public async Task<int> UpdateAsync(int id, Team team)
         {
-            _context.Update(team);
-            await _context.SaveChangesAsync();
-            return team;
+            return await _context.Teams
+                .Where(t => t.Id == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Name, team.Name));
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            var team = await _context.Teams.FindAsync(id);
-            if (team != null)
-            {
-                _context.Teams.Remove(team);
-                await _context.SaveChangesAsync();
-            }
+            return await _context.Teams
+                 .Where(t => t.Id == id)
+                 .ExecuteDeleteAsync();
         }
 
         public async Task<bool> ExistsAsync(int id)

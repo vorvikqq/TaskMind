@@ -7,8 +7,8 @@ namespace TaskMind.Application.Repositories.Interfaces
         Task<List<Team>> GetAllAsync();
         Task<Team?> GetByIdAsync(int id);
         Task<Team> CreateAsync(Team team);
-        Task<Team> UpdateAsync(Team team);
-        Task DeleteAsync(int id);
+        Task<int> UpdateAsync(int id, Team team);
+        Task<int> DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
     }
 }

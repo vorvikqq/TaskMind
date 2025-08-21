@@ -1,5 +1,6 @@
 ﻿using TaskMind.Application.DTOs;
 using TaskMind.Application.DTOs.Team;
+using TaskMind.Application.Mappers;
 using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Application.Services.Interfaces;
 using TaskMind.Domain.Models;
@@ -45,27 +46,25 @@ namespace TaskMind.Application.Services
 
         public async Task CreateAsync(CreateTeamRequest dto)
         {
-            var team = new Team { Name = dto.Name };
+            var team = dto.ToTeamFromCreate();
             await _teamRepo.CreateAsync(team);
         }
 
         public async Task UpdateAsync(UpdateTeamRequest dto)
         {
-            var team = await _teamRepo.GetByIdAsync(dto.Id);
-            if (team == null)
-                throw new KeyNotFoundException("Team not found");
+            var team = dto.ToTeamFromUpdate();
+            var updatedCount = await _teamRepo.UpdateAsync(team.Id, team);
 
-            team.Name = dto.Name;
-            await _teamRepo.UpdateAsync(team);
+            if (updatedCount == 0)
+                throw new KeyNotFoundException("Team not found");
         }
 
         public async Task DeleteAsync(int id)
         {
-            var team = await _teamRepo.GetByIdAsync(id);
-            if (team == null)
-                throw new KeyNotFoundException("Team not found");
+            var deletedCount = await _teamRepo.DeleteAsync(id);
 
-            await _teamRepo.DeleteAsync(id);
+            if (deletedCount == 0)
+                throw new KeyNotFoundException("Team not found");
         }
 
         public async Task<bool> ExistsAsync(int id)

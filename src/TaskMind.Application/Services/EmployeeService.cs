@@ -63,9 +63,9 @@ namespace TaskMind.Application.Services
             var employee = dto.ToEmployeeFromUpdate();
 
             var updatedCount = await _employeeRepo.UpdateAsync(dto.Id, employee);
+
             if (updatedCount == 0)
                 throw new KeyNotFoundException("Employee not found");
-
         }
 
         public async Task DeleteEmployeeAsync(int id)
