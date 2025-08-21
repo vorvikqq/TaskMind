@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: my-postgres
+    environment:
+      POSTGRES_DB: taskmind_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # MVC app
+  web:
+    build: ./
+    container_name: my-mvc-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - DOTNET_ENVIRONMENT=Docker
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to start...' &&
+        sleep 30 &&
+        dotnet TaskMind.Web.dll
+      "
+      
+  # Python Api  
+  api:
+    build: ./Api
+    container_name: my-python-api
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

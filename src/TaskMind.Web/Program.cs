@@ -9,6 +9,9 @@ using TaskMind.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var apiUrl = builder.Configuration["ApiUrl"]
+    ?? throw new InvalidOperationException("Api url not found.");
+
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -33,7 +36,7 @@ builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IWorkloadCalculationService, WorkloadCalculationService>();
 builder.Services.AddRefitClient<ITaskAssignmentApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:8000"));
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(apiUrl));
 
 var app = builder.Build();
 
