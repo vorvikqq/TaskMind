@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 using TaskMind.Domain.Constants;
 using TaskMind.Domain.Models;
 using TaskMind.Infrastructure.Data;
@@ -11,20 +13,29 @@ namespace TaskMind.Infrastructure.Tests
     {
         private readonly ApplicationDbContext _context;
         private readonly TaskItemRepository _repository;
+        private readonly DbConnection _connection;
 
         public TaskItemRepositoryTests()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
             _context = new ApplicationDbContext(options);
+
+            _context.Database.EnsureCreated();
+
+            _context.Database.ExecuteSqlRaw("PRAGMA foreign_keys = ON;");
             _repository = new TaskItemRepository(_context);
         }
 
         public void Dispose()
         {
             _context.Dispose();
+            _connection.Dispose();
         }
 
         #region CreateAsync Tests
@@ -445,7 +456,7 @@ namespace TaskMind.Infrastructure.Tests
             var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.Should().Be(8);
+            result.Should().Be(1);
 
             // Verify in database
             var taskInDb = await _context.Tasks.FindAsync(task.Id);
@@ -548,7 +559,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(taskId);
 
             // Assert
-            var taskInDb = await _context.Tasks.FindAsync(taskId);
+            var taskInDb = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             taskInDb.Should().BeNull();
 
             var exists = await _context.Tasks.AnyAsync(t => t.Id == taskId);
@@ -591,7 +602,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(taskId);
 
             // Assert
-            var taskInDb = await _context.Tasks.FindAsync(taskId);
+            var taskInDb = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             taskInDb.Should().BeNull();
 
             // Employee should still exist
