@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Moq;
 using TaskMind.Application.DTOs.Employee;
+using TaskMind.Application.Mappers;
 using TaskMind.Application.Repositories.Interfaces;
 using TaskMind.Application.Services;
 using TaskMind.Domain.Models;
@@ -246,25 +247,16 @@ namespace TaskMind.Application.Tests
                 TaskCompletionSpeed = 9.0,
                 TeamId = 2
             };
-            var existingEmployee = new Employee
-            {
-                Id = 1,
-                Name = "Old Name",
-                Skills = new List<string> { "C#" },
-                CurrentWorkload = 50,
-                TaskCompletionSpeed = 7.0,
-                TeamId = 1
-            };
+            var employee = updateDto.ToEmployeeFromUpdate();
 
-            _mockEmployeeRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
-                            .ReturnsAsync(existingEmployee);
+            _mockEmployeeRepo.Setup(x => x.UpdateAsync(updateDto.Id, It.IsAny<Employee>()))
+                            .ReturnsAsync(1);
 
             // Act
             await _employeeService.UpdateEmployeeAsync(updateDto);
 
             // Assert
-            _mockEmployeeRepo.Verify(x => x.GetByIdAsync(updateDto.Id), Times.Once);
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(existingEmployee.Id, existingEmployee), Times.Once);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(updateDto.Id, It.IsAny<Employee>()), Times.Once);
         }
 
         [Fact]
@@ -272,15 +264,15 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var updateDto = new UpdateEmployeeRequest { Id = 999 };
-            _mockEmployeeRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
-                            .ReturnsAsync((Employee?)null);
+            _mockEmployeeRepo.Setup(x => x.UpdateAsync(updateDto.Id, It.IsAny<Employee>()))
+                            .ReturnsAsync(0);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _employeeService.UpdateEmployeeAsync(updateDto));
 
             exception.Message.Should().Be("Employee not found");
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<Employee>()), Times.Never);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<Employee>()), Times.Once);
         }
 
         #endregion
@@ -292,15 +284,13 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var employeeId = 1;
-            var existingEmployee = new Employee { Id = employeeId, Name = "John Doe" };
-            _mockEmployeeRepo.Setup(x => x.GetByIdAsync(employeeId))
-                            .ReturnsAsync(existingEmployee);
+            _mockEmployeeRepo.Setup(x => x.DeleteAsync(employeeId))
+                            .ReturnsAsync(1);
 
             // Act
             await _employeeService.DeleteEmployeeAsync(employeeId);
 
             // Assert
-            _mockEmployeeRepo.Verify(x => x.GetByIdAsync(employeeId), Times.Once);
             _mockEmployeeRepo.Verify(x => x.DeleteAsync(employeeId), Times.Once);
         }
 
@@ -309,15 +299,15 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var employeeId = 999;
-            _mockEmployeeRepo.Setup(x => x.GetByIdAsync(employeeId))
-                            .ReturnsAsync((Employee?)null);
+            _mockEmployeeRepo.Setup(x => x.DeleteAsync(employeeId))
+                            .ReturnsAsync(0);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _employeeService.DeleteEmployeeAsync(employeeId));
 
             exception.Message.Should().Be("Employee not found");
-            _mockEmployeeRepo.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Never);
+            _mockEmployeeRepo.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Once);
         }
 
         #endregion
