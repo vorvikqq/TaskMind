@@ -19,16 +19,21 @@ namespace TaskMind.Application.Mappers
                 Status = createDto.Status,
             };
         }
-        public static void UpdateTaskItemFromDto(this TaskItem taskItem, UpdateTaskItemRequest updateDto)
+
+        public static TaskItem ToTaskItemFromUpdate(this UpdateTaskItemRequest updateDto)
         {
-            taskItem.Title = updateDto.Title;
-            taskItem.Description = updateDto.Description;
-            taskItem.Difficulty = updateDto.Difficulty;
-            taskItem.RequiredSkills = ParseSkills(updateDto.RequiredSkills);
-            taskItem.DeadlineDays = updateDto.DeadlineDays;
-            taskItem.EstimatedHours = updateDto.EstimatedHours;
-            taskItem.TeamId = updateDto.TeamId;
-            taskItem.Status = updateDto.Status;
+            return new TaskItem
+            {
+                Id = updateDto.Id,
+                Title = updateDto.Title,
+                Description = updateDto.Description,
+                Difficulty = updateDto.Difficulty,
+                RequiredSkills = ParseSkills(updateDto.RequiredSkills),
+                DeadlineDays = updateDto.DeadlineDays,
+                EstimatedHours = updateDto.EstimatedHours,
+                TeamId = updateDto.TeamId,
+                Status = updateDto.Status,
+            };
         }
 
         private static List<string> ParseSkills(string skills)

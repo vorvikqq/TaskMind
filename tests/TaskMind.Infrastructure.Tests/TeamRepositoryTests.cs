@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 using TaskMind.Domain.Constants;
 using TaskMind.Domain.Models;
 using TaskMind.Infrastructure.Data;
@@ -11,20 +13,29 @@ namespace TaskMind.Infrastructure.Tests
     {
         private readonly ApplicationDbContext _context;
         private readonly TeamRepository _repository;
+        private readonly DbConnection _connection;
 
         public TeamRepositoryTests()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
             _context = new ApplicationDbContext(options);
+
+            _context.Database.EnsureCreated();
+
+            _context.Database.ExecuteSqlRaw("PRAGMA foreign_keys = ON;");
             _repository = new TeamRepository(_context);
         }
 
         public void Dispose()
         {
             _context.Dispose();
+            _connection.Dispose();
         }
 
         #region CreateAsync Tests
@@ -315,11 +326,10 @@ namespace TaskMind.Infrastructure.Tests
             team.Name = "Updated Name";
 
             // Act
-            var result = await _repository.UpdateAsync(team);
+            var result = await _repository.UpdateAsync(team.Id, team);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Name.Should().Be("Updated Name");
+            result.Should().Be(1);
 
             // Verify in database
             var teamInDb = await _context.Teams.FindAsync(team.Id);
@@ -328,7 +338,7 @@ namespace TaskMind.Infrastructure.Tests
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnUpdatedTeam()
+        public async Task UpdateAsync_ShouldReturnUpdatedTeamRows()
         {
             // Arrange
             var team = new Team
@@ -341,11 +351,10 @@ namespace TaskMind.Infrastructure.Tests
             team.Name = "Modified Team";
 
             // Act
-            var result = await _repository.UpdateAsync(team);
+            var result = await _repository.UpdateAsync(team.Id, team);
 
             // Assert
-            result.Should().BeSameAs(team);
-            result.Name.Should().Be("Modified Team");
+            result.Should().Be(1);
         }
 
         #endregion
@@ -369,7 +378,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(teamId);
 
             // Assert
-            var teamInDb = await _context.Teams.FindAsync(teamId);
+            var teamInDb = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
             teamInDb.Should().BeNull();
 
             var exists = await _context.Teams.AnyAsync(t => t.Id == teamId);
@@ -433,7 +442,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(teamId);
 
             // Assert
-            var teamInDb = await _context.Teams.FindAsync(teamId);
+            var teamInDb = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
             teamInDb.Should().BeNull();
         }
 
@@ -460,7 +469,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(teamId);
 
             // Assert
-            var teamInDb = await _context.Teams.FindAsync(teamId);
+            var teamInDb = await _context.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
             teamInDb.Should().BeNull();
 
         }

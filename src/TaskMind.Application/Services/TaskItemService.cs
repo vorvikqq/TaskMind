@@ -81,21 +81,19 @@ namespace TaskMind.Application.Services
 
         public async Task UpdateAsync(UpdateTaskItemRequest dto)
         {
-            var taskItem = await _taskItemRepo.GetByIdAsync(dto.Id);
-            if (taskItem == null)
-                throw new KeyNotFoundException("Task not found");
+            var task = dto.ToTaskItemFromUpdate();
+            var updatedCount = await _taskItemRepo.UpdateAsync(task.Id, task);
 
-            taskItem.UpdateTaskItemFromDto(dto);
-            await _taskItemRepo.UpdateAsync(taskItem);
+            if (updatedCount == 0)
+                throw new KeyNotFoundException("Task not found");
         }
 
         public async Task DeleteAsync(int id)
         {
-            var taskItem = await _taskItemRepo.GetByIdAsync(id);
-            if (taskItem == null)
-                throw new KeyNotFoundException("Task not found");
+            var deletedCount = await _taskItemRepo.DeleteAsync(id);
 
-            await _taskItemRepo.DeleteAsync(id);
+            if (deletedCount == 0)
+                throw new KeyNotFoundException("Task not found");
         }
 
         public async Task<bool> ExistsAsync(int id)

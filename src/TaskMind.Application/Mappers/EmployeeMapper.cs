@@ -17,14 +17,19 @@ namespace TaskMind.Application.Mappers
             };
         }
 
-        public static void UpdateEmployeeFromDto(this Employee employee, UpdateEmployeeRequest updateEmployeeDto)
+        public static Employee ToEmployeeFromUpdate(this UpdateEmployeeRequest updateEmployeeDto)
         {
-            employee.Name = updateEmployeeDto.Name;
-            employee.Skills = ParseSkills(updateEmployeeDto.Skills);
-            employee.CurrentWorkload = updateEmployeeDto.CurrentWorkload;
-            employee.TaskCompletionSpeed = updateEmployeeDto.TaskCompletionSpeed;
-            employee.TeamId = updateEmployeeDto.TeamId;
+            return new Employee
+            {
+                Name = updateEmployeeDto.Name,
+                Skills = ParseSkills(updateEmployeeDto.Skills),
+                CurrentWorkload = updateEmployeeDto.CurrentWorkload,
+                TaskCompletionSpeed = updateEmployeeDto.TaskCompletionSpeed,
+                TeamId = updateEmployeeDto.TeamId
+            };
         }
+
+
         private static List<string> ParseSkills(string skills)
         {
             return skills.Split(',')

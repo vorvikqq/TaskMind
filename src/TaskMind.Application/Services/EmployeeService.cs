@@ -60,21 +60,20 @@ namespace TaskMind.Application.Services
 
         public async Task UpdateEmployeeAsync(UpdateEmployeeRequest dto)
         {
-            var employee = await _employeeRepo.GetByIdAsync(dto.Id);
-            if (employee == null)
-                throw new KeyNotFoundException("Employee not found");
+            var employee = dto.ToEmployeeFromUpdate();
 
-            employee.UpdateEmployeeFromDto(dto);
-            await _employeeRepo.UpdateAsync(employee);
+            var updatedCount = await _employeeRepo.UpdateAsync(dto.Id, employee);
+
+            if (updatedCount == 0)
+                throw new KeyNotFoundException("Employee not found");
         }
 
         public async Task DeleteEmployeeAsync(int id)
         {
-            var employee = await _employeeRepo.GetByIdAsync(id);
-            if (employee == null)
-                throw new KeyNotFoundException("Employee not found");
+            var deletedCount = await _employeeRepo.DeleteAsync(id);
 
-            await _employeeRepo.DeleteAsync(id);
+            if (deletedCount == 0)
+                throw new KeyNotFoundException("Employee not found");
         }
 
         public async Task<bool> ExistsAsync(int id)

@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 using TaskMind.Domain.Constants;
 using TaskMind.Domain.Models;
 using TaskMind.Infrastructure.Data;
@@ -11,20 +13,29 @@ namespace TaskMind.Infrastructure.Tests
     {
         private readonly ApplicationDbContext _context;
         private readonly TaskItemRepository _repository;
+        private readonly DbConnection _connection;
 
         public TaskItemRepositoryTests()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
             _context = new ApplicationDbContext(options);
+
+            _context.Database.EnsureCreated();
+
+            _context.Database.ExecuteSqlRaw("PRAGMA foreign_keys = ON;");
             _repository = new TaskItemRepository(_context);
         }
 
         public void Dispose()
         {
             _context.Dispose();
+            _connection.Dispose();
         }
 
         #region CreateAsync Tests
@@ -442,18 +453,10 @@ namespace TaskMind.Infrastructure.Tests
             task.EmployeeId = employee.Id;
 
             // Act
-            var result = await _repository.UpdateAsync(task);
+            var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Title.Should().Be("Updated Title");
-            result.Description.Should().Be("Updated Description");
-            result.Difficulty.Should().Be(7.0);
-            result.RequiredSkills.Should().BeEquivalentTo(new[] { "C#", "React", "SQL" });
-            result.DeadlineDays.Should().Be(10);
-            result.EstimatedHours.Should().Be(50);
-            result.Status.Should().Be(TaskState.InProgress);
-            result.EmployeeId.Should().Be(employee.Id);
+            result.Should().Be(1);
 
             // Verify in database
             var taskInDb = await _context.Tasks.FindAsync(task.Id);
@@ -469,7 +472,7 @@ namespace TaskMind.Infrastructure.Tests
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnUpdatedTask()
+        public async Task UpdateAsync_ShouldReturnUpdatedTaskRows()
         {
             // Arrange
             var team = new Team { Name = "Test Team" };
@@ -488,11 +491,10 @@ namespace TaskMind.Infrastructure.Tests
             task.Title = "Modified Task";
 
             // Act
-            var result = await _repository.UpdateAsync(task);
+            var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.Should().BeSameAs(task);
-            result.Title.Should().Be("Modified Task");
+            result.Should().Be(1);
         }
 
 
@@ -523,12 +525,9 @@ namespace TaskMind.Infrastructure.Tests
             task.Status = TaskState.New;
 
             // Act
-            var result = await _repository.UpdateAsync(task);
+            var result = await _repository.UpdateAsync(task.Id, task);
 
             // Assert
-            result.EmployeeId.Should().BeNull();
-            result.Status.Should().Be(TaskState.New);
-
             var taskInDb = await _context.Tasks.FindAsync(task.Id);
             taskInDb!.EmployeeId.Should().BeNull();
         }
@@ -560,7 +559,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(taskId);
 
             // Assert
-            var taskInDb = await _context.Tasks.FindAsync(taskId);
+            var taskInDb = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             taskInDb.Should().BeNull();
 
             var exists = await _context.Tasks.AnyAsync(t => t.Id == taskId);
@@ -603,7 +602,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(taskId);
 
             // Assert
-            var taskInDb = await _context.Tasks.FindAsync(taskId);
+            var taskInDb = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             taskInDb.Should().BeNull();
 
             // Employee should still exist

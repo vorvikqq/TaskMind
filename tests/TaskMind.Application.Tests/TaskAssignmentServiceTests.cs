@@ -229,11 +229,11 @@ namespace TaskMind.Application.Tests
 
             // Verify task assignment
             task.EmployeeId.Should().Be(employeeId);
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(task), Times.Once);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(task.Id, task), Times.Once);
 
             // Verify workload update
             employee.CurrentWorkload.Should().Be(0.7); // 0.5 + 0.2
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(employee), Times.Once);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(employee.Id, employee), Times.Once);
         }
 
         [Fact]
@@ -348,11 +348,11 @@ namespace TaskMind.Application.Tests
 
             // Verify task unassignment
             task.EmployeeId.Should().BeNull();
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(task), Times.Once);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(task.Id, task), Times.Once);
 
             // Verify workload update
             employee.CurrentWorkload.Should().Be(0.5); // 0.7 - 0.2
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(employee), Times.Once);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(employee.Id, employee), Times.Once);
         }
 
         [Fact]
@@ -380,10 +380,10 @@ namespace TaskMind.Application.Tests
 
             // Verify task unassignment
             task.EmployeeId.Should().BeNull();
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(task), Times.Once);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(task.Id, task), Times.Once);
 
             // Verify no workload update
-            _mockEmployeeRepo.Verify(x => x.UpdateAsync(It.IsAny<Employee>()), Times.Never);
+            _mockEmployeeRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<Employee>()), Times.Never);
         }
 
         [Fact]

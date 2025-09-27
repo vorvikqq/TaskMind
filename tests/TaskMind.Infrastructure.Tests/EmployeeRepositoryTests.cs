@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 using TaskMind.Domain.Models;
 using TaskMind.Infrastructure.Data;
 using TaskMind.Infrastructure.Repositories;
@@ -10,20 +12,39 @@ namespace TaskMind.Infrastructure.Tests
     {
         private readonly ApplicationDbContext _context;
         private readonly EmployeeRepository _repository;
+        private readonly DbConnection _connection;
+        private Team _commonTeam;
 
         public EmployeeRepositoryTests()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
             _context = new ApplicationDbContext(options);
+
+            _context.Database.EnsureCreated();
+
+            _context.Database.ExecuteSqlRaw("PRAGMA foreign_keys = ON;");
             _repository = new EmployeeRepository(_context);
+
+            CreateCommonTeam();
+        }
+
+        private void CreateCommonTeam()
+        {
+            _commonTeam = new Team { Name = "Common Test Team" };
+            _context.Teams.Add(_commonTeam);
+            _context.SaveChanges();
         }
 
         public void Dispose()
         {
             _context.Dispose();
+            _connection.Dispose();
         }
 
         #region CreateAsync Tests
@@ -38,7 +59,7 @@ namespace TaskMind.Infrastructure.Tests
                 Skills = new List<string> { "C#", "React" },
                 CurrentWorkload = 0.5,
                 TaskCompletionSpeed = 8.0,
-                TeamId = 1
+                TeamId = _commonTeam.Id
             };
 
             // Act
@@ -65,7 +86,7 @@ namespace TaskMind.Infrastructure.Tests
                 Skills = new List<string> { "Python" },
                 CurrentWorkload = 0.3,
                 TaskCompletionSpeed = 7.5,
-                TeamId = 2
+                TeamId = _commonTeam.Id
             };
 
             // Act
@@ -270,7 +291,7 @@ namespace TaskMind.Infrastructure.Tests
             {
                 Name = "Existing Employee",
                 Skills = new List<string> { "C#" },
-                TeamId = 1
+                TeamId = _commonTeam.Id
             };
             await _context.Employees.AddAsync(employee);
             await _context.SaveChangesAsync();
@@ -306,7 +327,7 @@ namespace TaskMind.Infrastructure.Tests
                 Skills = new List<string> { "C#" },
                 CurrentWorkload = 0.5,
                 TaskCompletionSpeed = 7.0,
-                TeamId = 1
+                TeamId = _commonTeam.Id
             };
             await _context.Employees.AddAsync(employee);
             await _context.SaveChangesAsync();
@@ -316,18 +337,13 @@ namespace TaskMind.Infrastructure.Tests
             employee.Skills = new List<string> { "C#", "React", "SQL" };
             employee.CurrentWorkload = 0.8;
             employee.TaskCompletionSpeed = 9.0;
-            employee.TeamId = 2;
+            employee.TeamId = _commonTeam.Id;
 
             // Act
-            var result = await _repository.UpdateAsync(employee);
+            var result = await _repository.UpdateAsync(employee.Id, employee);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Name.Should().Be("Updated Name");
-            result.Skills.Should().BeEquivalentTo(new List<string> { "C#", "React", "SQL" });
-            result.CurrentWorkload.Should().Be(0.8);
-            result.TaskCompletionSpeed.Should().Be(9.0);
-            result.TeamId.Should().Be(2);
+            result.Should().Be(1);
 
             // Verify in database
             var employeeInDb = await _context.Employees.FindAsync(employee.Id);
@@ -336,11 +352,11 @@ namespace TaskMind.Infrastructure.Tests
             employeeInDb.Skills.Should().BeEquivalentTo(new[] { "C#", "React", "SQL" });
             employeeInDb.CurrentWorkload.Should().Be(0.8);
             employeeInDb.TaskCompletionSpeed.Should().Be(9.0);
-            employeeInDb.TeamId.Should().Be(2);
+            employeeInDb.TeamId.Should().Be(1);
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnUpdatedEmployee()
+        public async Task UpdateAsync_ShouldReturnUpdatedEmployeeRows()
         {
             // Arrange
             var employee = new Employee
@@ -349,7 +365,7 @@ namespace TaskMind.Infrastructure.Tests
                 Skills = new List<string> { "Python" },
                 CurrentWorkload = 0.3,
                 TaskCompletionSpeed = 6.0,
-                TeamId = 1
+                TeamId = _commonTeam.Id
             };
             await _context.Employees.AddAsync(employee);
             await _context.SaveChangesAsync();
@@ -357,11 +373,10 @@ namespace TaskMind.Infrastructure.Tests
             employee.Name = "Modified Employee";
 
             // Act
-            var result = await _repository.UpdateAsync(employee);
+            var result = await _repository.UpdateAsync(employee.Id, employee);
 
             // Assert
-            result.Should().BeSameAs(employee);
-            result.Name.Should().Be("Modified Employee");
+            result.Should().Be(1);
         }
 
         #endregion
@@ -376,7 +391,7 @@ namespace TaskMind.Infrastructure.Tests
             {
                 Name = "Employee to Delete",
                 Skills = new List<string> { "Java" },
-                TeamId = 1
+                TeamId = _commonTeam.Id
             };
             await _context.Employees.AddAsync(employee);
             await _context.SaveChangesAsync();
@@ -387,7 +402,7 @@ namespace TaskMind.Infrastructure.Tests
             await _repository.DeleteAsync(employeeId);
 
             // Assert
-            var employeeInDb = await _context.Employees.FindAsync(employeeId);
+            var employeeInDb = await _context.Employees.FirstOrDefaultAsync(e => e.Id == employeeId);
             employeeInDb.Should().BeNull();
 
             var exists = await _context.Employees.AnyAsync(e => e.Id == employeeId);
@@ -410,7 +425,7 @@ namespace TaskMind.Infrastructure.Tests
             {
                 Name = "Existing Employee",
                 Skills = new List<string> { "C#" },
-                TeamId = 1
+                TeamId = _commonTeam.Id
             };
             await _context.Employees.AddAsync(employee);
             await _context.SaveChangesAsync();

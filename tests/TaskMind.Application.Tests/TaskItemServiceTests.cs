@@ -332,22 +332,16 @@ namespace TaskMind.Application.Tests
                 Title = "Updated Task",
                 Description = "Updated Description"
             };
-            var existingTask = new TaskItem
-            {
-                Id = 1,
-                Title = "Old Task",
-                Description = "Old Description"
-            };
 
-            _mockTaskItemRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
-                            .ReturnsAsync(existingTask);
+
+            _mockTaskItemRepo.Setup(x => x.UpdateAsync(updateDto.Id, It.IsAny<TaskItem>()))
+                            .ReturnsAsync(1);
 
             // Act
             await _taskItemService.UpdateAsync(updateDto);
 
             // Assert
-            _mockTaskItemRepo.Verify(x => x.GetByIdAsync(updateDto.Id), Times.Once);
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(existingTask), Times.Once);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(updateDto.Id, It.IsAny<TaskItem>()), Times.Once);
         }
 
         [Fact]
@@ -355,15 +349,16 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var updateDto = new UpdateTaskItemRequest { Id = 999 };
-            _mockTaskItemRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
-                            .ReturnsAsync((TaskItem?)null);
+
+            _mockTaskItemRepo.Setup(x => x.UpdateAsync(updateDto.Id, It.IsAny<TaskItem>()))
+                            .ReturnsAsync(0);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _taskItemService.UpdateAsync(updateDto));
 
             exception.Message.Should().Be("Task not found");
-            _mockTaskItemRepo.Verify(x => x.UpdateAsync(It.IsAny<TaskItem>()), Times.Never);
+            _mockTaskItemRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<TaskItem>()), Times.Once);
         }
 
         #endregion
@@ -376,14 +371,13 @@ namespace TaskMind.Application.Tests
             // Arrange
             var taskId = 1;
             var existingTask = new TaskItem { Id = taskId, Title = "Task to Delete" };
-            _mockTaskItemRepo.Setup(x => x.GetByIdAsync(taskId))
-                            .ReturnsAsync(existingTask);
+            _mockTaskItemRepo.Setup(x => x.DeleteAsync(taskId))
+                            .ReturnsAsync(1);
 
             // Act
             await _taskItemService.DeleteAsync(taskId);
 
             // Assert
-            _mockTaskItemRepo.Verify(x => x.GetByIdAsync(taskId), Times.Once);
             _mockTaskItemRepo.Verify(x => x.DeleteAsync(taskId), Times.Once);
         }
 
@@ -392,15 +386,15 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var taskId = 999;
-            _mockTaskItemRepo.Setup(x => x.GetByIdAsync(taskId))
-                            .ReturnsAsync((TaskItem?)null);
+            _mockTaskItemRepo.Setup(x => x.DeleteAsync(taskId))
+                            .ReturnsAsync(0);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _taskItemService.DeleteAsync(taskId));
 
             exception.Message.Should().Be("Task not found");
-            _mockTaskItemRepo.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Never);
+            _mockTaskItemRepo.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Once);
         }
 
         #endregion

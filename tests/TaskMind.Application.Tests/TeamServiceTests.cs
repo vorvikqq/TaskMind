@@ -242,18 +242,15 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var updateDto = new UpdateTeamRequest { Id = 1, Name = "Updated Team Name" };
-            var existingTeam = new Team { Id = 1, Name = "Old Team Name" };
 
-            _mockTeamRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
-                        .ReturnsAsync(existingTeam);
+            _mockTeamRepo.Setup(x => x.UpdateAsync(updateDto.Id, It.IsAny<Team>()))
+                        .ReturnsAsync(1);
 
             // Act
             await _teamService.UpdateAsync(updateDto);
 
             // Assert
-            existingTeam.Name.Should().Be("Updated Team Name");
-            _mockTeamRepo.Verify(x => x.GetByIdAsync(updateDto.Id), Times.Once);
-            _mockTeamRepo.Verify(x => x.UpdateAsync(existingTeam), Times.Once);
+            _mockTeamRepo.Verify(x => x.UpdateAsync(updateDto.Id, It.IsAny<Team>()), Times.Once);
         }
 
         [Fact]
@@ -261,15 +258,16 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var updateDto = new UpdateTeamRequest { Id = 999, Name = "Non-existent Team" };
-            _mockTeamRepo.Setup(x => x.GetByIdAsync(updateDto.Id))
-                        .ReturnsAsync((Team?)null);
+
+            _mockTeamRepo.Setup(x => x.UpdateAsync(updateDto.Id, It.IsAny<Team>()))
+                        .ReturnsAsync(0);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _teamService.UpdateAsync(updateDto));
 
             exception.Message.Should().Be("Team not found");
-            _mockTeamRepo.Verify(x => x.UpdateAsync(It.IsAny<Team>()), Times.Never);
+            _mockTeamRepo.Verify(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Once);
         }
 
         #endregion
@@ -282,14 +280,13 @@ namespace TaskMind.Application.Tests
             // Arrange
             var teamId = 1;
             var existingTeam = new Team { Id = teamId, Name = "Team to Delete" };
-            _mockTeamRepo.Setup(x => x.GetByIdAsync(teamId))
-                        .ReturnsAsync(existingTeam);
+            _mockTeamRepo.Setup(x => x.DeleteAsync(teamId))
+                        .ReturnsAsync(1);
 
             // Act
             await _teamService.DeleteAsync(teamId);
 
             // Assert
-            _mockTeamRepo.Verify(x => x.GetByIdAsync(teamId), Times.Once);
             _mockTeamRepo.Verify(x => x.DeleteAsync(teamId), Times.Once);
         }
 
@@ -298,15 +295,15 @@ namespace TaskMind.Application.Tests
         {
             // Arrange
             var teamId = 999;
-            _mockTeamRepo.Setup(x => x.GetByIdAsync(teamId))
-                        .ReturnsAsync((Team?)null);
+            _mockTeamRepo.Setup(x => x.DeleteAsync(teamId))
+                        .ReturnsAsync(0);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _teamService.DeleteAsync(teamId));
 
             exception.Message.Should().Be("Team not found");
-            _mockTeamRepo.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Never);
+            _mockTeamRepo.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Once);
         }
 
         #endregion
